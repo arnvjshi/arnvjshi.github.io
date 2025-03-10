@@ -31,7 +31,7 @@ const LoadingAnimation = () => {
           transition={{ delay: 0.5, duration: 0.5 }}
           className="absolute inset-0 flex items-center justify-center text-2xl font-bold"
         >
-          AJ
+          Loading...
         </motion.div>
       </motion.div>
     </div>

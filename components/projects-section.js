@@ -12,8 +12,8 @@ const projects = [
       "A seamless online-to-offline shopping experience where customers can browse, scan, and checkout with ease, while staff manage inventory through an admin dashboard.",
     image: "/placeholder.svg?height=400&width=600",
     technologies: ["Next.js", "MongoDB", "AWS Lambda"],
-    link: "#",
-    github: "#",
+    link: "https://si-tnovate.vercel.app/",
+    github: "https://github.com/arnvjshi/Smart-Shop",
   },
   {
     title: "Top-Down Retro Game",
@@ -30,17 +30,17 @@ const projects = [
       "Enhanced a blockchain codebase to include a secure transaction system, ensuring validation and storage of transactions in blocks.",
     image: "/placeholder.svg?height=400&width=600",
     technologies: ["Blockchain", "JavaScript", "Cryptography"],
-    link: "#",
-    github: "#",
+    link: "https://github.com/arnvjshi/BlockChain-Transaction-System",
+    github: "https://github.com/arnvjshi/BlockChain-Transaction-System",
   },
   {
-    title: "Software Engineering Lab Assignments",
+    title: "Cyber Lab",
     description:
-      "Contributed detailed technical reports and research on various software process models, ensuring structured documentation and clarity.",
+      "Tool to secure or book classes labs and venue for the students and faculties. It also provides the facility to book the lab for the students.",
     image: "/placeholder.svg?height=400&width=600",
-    technologies: ["Documentation", "Research", "Software Engineering"],
-    link: "#",
-    github: "#",
+    technologies: ["Next.js", "MongoDB", "DevOps"],
+    link: "https://github.com/arnvjshi/CyberLab",
+    github: "https://cyber-lab.vercel.app/",
   },
 ]
 

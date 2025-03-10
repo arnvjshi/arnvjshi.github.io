@@ -37,7 +37,7 @@ const AboutSection = () => {
           >
             <div className="relative rounded-lg overflow-hidden">
               <Image
-                src="/placeholder.svg?height=500&width=500"
+                src="/profile.jpg?height=500&width=500"
                 alt="Arnav Joshi"
                 width={500}
                 height={500}

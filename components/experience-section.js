@@ -27,7 +27,7 @@ const experiences = [
     ],
   },
   {
-    title: "Teaching Assistant (TA) & Mentor",
+    title: "Mentor",
     description:
       "Helped peers with technical concepts and practical implementations, making complex topics accessible and fun.",
     icon: BookOpen,

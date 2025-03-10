@@ -12,6 +12,7 @@ import ScrollIndicator from "@/components/scroll-indicator"
 
 export default function Home() {
   return (
+    
     <main className="overflow-hidden">
       {/* <VantaBackground /> */}
       <InteractiveBackground />

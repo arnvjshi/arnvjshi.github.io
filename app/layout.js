@@ -24,12 +24,16 @@ export const metadata = {
   title: "Arnav Joshi | Developer & Tech Enthusiast",
   description:
     "Portfolio of Arnav Joshi, a passionate developer specializing in web development, machine learning, cloud computing, and blockchain.",
-    generator: 'v0.dev'
+    generator: 'arnvjshi',
+    icons: {
+      favicon: 'favicon.ico',
+    }
 }
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className="scroll-smooth">
+      <head><link rel="icon" href="/favicon.ico"/></head>
       <body
         className={`${spaceGrotesk.variable} ${inter.variable} font-sans bg-[rgb(var(--background))] text-[rgb(var(--foreground))] antialiased`}
       >
@@ -48,3 +52,4 @@ export default function RootLayout({ children }) {
 
 
 import './globals.css'
+import { icons } from "lucide-react";
