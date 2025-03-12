@@ -77,6 +77,7 @@ export default function Home() {
   return (
     <ThemeProvider defaultTheme="dark" attribute="class">
       <div className="relative min-h-screen bg-gradient-to-b from-white to-gray-100 dark:from-black dark:to-gray-900 text-black dark:text-white overflow-hidden">
+        <title>Arnav Joshi</title>
         <CustomCursor />
         <Navbar />
         <FloatingIcons />

@@ -67,7 +67,7 @@ export default function Navbar() {
       <div className="container mx-auto flex justify-between items-center">
         <motion.a href="#home" className="relative group" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
           <span className="text-2xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-400">
-            AJ
+            Arnav Joshi
           </span>
           <motion.span
             className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-gray-400 to-gray-600 dark:from-gray-400 dark:to-gray-200 group-hover:w-full transition-all duration-300"
