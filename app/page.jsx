@@ -80,18 +80,21 @@ export default function Home() {
         <title>Arnav Joshi</title>
         <CustomCursor />
         <Navbar />
-        <FloatingIcons />
+        {/*<FloatingIcons />*/}
 
         {/* Progress bar */}
         <motion.div
           className="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-gray-500 via-gray-300 to-gray-500 dark:from-gray-700 dark:via-gray-300 dark:to-gray-700 z-50"
           style={{ scaleX: scrollYProgress, transformOrigin: "0%" }}
         />
-
+        
         <main ref={mainRef} className="relative z-10">
+        
           {/* Hero Section */}
+          
           <section id="home" className="min-h-screen relative overflow-hidden">
-            <VantaBackground ></VantaBackground>
+          < VantaBackground />
+            
               <div className="flex items-center justify-center min-h-screen px-4">
                 <motion.div className="text-center" style={{ y, opacity }}>
                   <motion.div
@@ -107,14 +110,14 @@ export default function Home() {
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 1, delay: 0.5 }}
                   >
-                    <Typography><div className="relative mx-auto w-32 h-32 md:w-40 md:h-40 mb-6 overflow-hidden rounded-full neumorphic-profile">
+                    <div className="relative mx-auto w-32 h-32 md:w-40 md:h-40 mb-6 overflow-hidden rounded-full neumorphic-profile">
                       <img
                         src="/placeholder.svg?height=160&width=160"
                         alt="Arnav Joshi"
                         className="w-full h-full object-cover"
                       />
                       <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-transparent to-white/20 dark:to-white/10"></div>
-                    </div></Typography>
+                    </div>
 
                     <ParallaxText baseVelocity={-1}>
                       <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 tracking-tighter hero-text">
@@ -167,6 +170,7 @@ export default function Home() {
                 </motion.div>
               </motion.div>
           </section>
+    
 
           <About />
           <Skills />
