@@ -80,15 +80,7 @@ export default function Home() {
         <title>Arnav Joshi</title>
         <CustomCursor />
         <Navbar />
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-        <FloatingIcons />
-=======
-        {/*<FloatingIcons />
->>>>>>> Stashed changes
-=======
-        {/*<FloatingIcons />
->>>>>>> Stashed changes
+  {/* <FloatingIcons /> */}
 
         {/* Progress bar */}
         <motion.div
@@ -115,14 +107,14 @@ export default function Home() {
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 1, delay: 0.5 }}
                   >
-                    <Typography><div className="relative mx-auto w-32 h-32 md:w-40 md:h-40 mb-6 overflow-hidden rounded-full neumorphic-profile">
+                    <div className="relative mx-auto w-32 h-32 md:w-40 md:h-40 mb-6 overflow-hidden rounded-full neumorphic-profile">
                       <img
                         src="/placeholder.svg?height=160&width=160"
                         alt="Arnav Joshi"
                         className="w-full h-full object-cover"
                       />
                       <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-transparent to-white/20 dark:to-white/10"></div>
-                    </div></Typography>
+                    </div>
 
                     <ParallaxText baseVelocity={-1}>
                       <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 tracking-tighter hero-text">
