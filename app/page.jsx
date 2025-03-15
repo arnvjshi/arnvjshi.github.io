@@ -13,10 +13,10 @@ import Experience from "@/components/experience"
 import Contact from "@/components/contact"
 import LoadingScreen from "@/components/loading-screen"
 import { ThemeProvider } from "@/components/theme-provider"
-import FloatingIcons from "@/components/floating-icons"
+//import FloatingIcons from "@/components/floating-icons"
 import VantaBackground from "@/components/vanta-background"
 import ParallaxText from "@/components/parallax-text"
-import Typography from "@/components/typography"
+//import Typography from "@/components/typography"
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -80,7 +80,11 @@ export default function Home() {
         <title>Arnav Joshi</title>
         <CustomCursor />
         <Navbar />
+<<<<<<< Updated upstream
         <FloatingIcons />
+=======
+        {/*<FloatingIcons />
+>>>>>>> Stashed changes
 
         {/* Progress bar */}
         <motion.div
