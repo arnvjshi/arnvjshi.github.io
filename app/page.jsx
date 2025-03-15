@@ -81,7 +81,11 @@ export default function Home() {
         <CustomCursor />
         <Navbar />
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         <FloatingIcons />
+=======
+        {/*<FloatingIcons />
+>>>>>>> Stashed changes
 =======
         {/*<FloatingIcons />
 >>>>>>> Stashed changes
