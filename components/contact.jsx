@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react"
 import { motion, useInView } from "framer-motion"
-import { Mail, Github, Linkedin, Send } from "lucide-react"
+import { Mail, Github, Linkedin, Send, Instagram } from "lucide-react"
 
 export default function Contact() {
   const sectionRef = useRef(null)
@@ -86,6 +86,13 @@ export default function Contact() {
       href: "https://linkedin.com/in/arnav-joshi-aj05",
       label: "linkedin.com/in/arnav-joshi-aj05",
     },
+    {
+      name: "Instagram",
+      icon: <Instagram className="w-5 h-5" />,
+      href: "https://instagram.com/arnv_jshi",
+      label: "instagram.com/arnv_jshi",
+    },
+    
   ]
 
   return (

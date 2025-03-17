@@ -4,7 +4,6 @@
 
 @layer base {
   :root {
-
     --background: 0 0% 100%;
     --foreground: 240 10% 3.9%;
     --card: 0 0% 100%;
@@ -48,26 +47,6 @@
     --input: 240 3.7% 15.9%;
     --ring: 240 4.9% 83.9%;
   }
-  .vanta-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: -10; /* Send to background */
-    overflow: hidden;
-    pointer-events: none; /* Prevent interference with UI */
-  }
-  
-  canvas {
-    display: block;
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-  }
-  
 }
 
 @layer base {
@@ -77,10 +56,87 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+    cursor: none;
+  }
+
+  @media (max-width: 768px) {
+    body {
+      cursor: auto;
+    }
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-bold tracking-tight;
+    font-feature-settings: "salt" 1, "ss01" 1;
+  }
+
+  h1 {
+    @apply text-4xl md:text-5xl lg:text-6xl;
+    letter-spacing: -0.025em;
+  }
+
+  h2 {
+    @apply text-3xl md:text-4xl;
+    letter-spacing: -0.025em;
+  }
+
+  h3 {
+    @apply text-2xl md:text-3xl;
+    letter-spacing: -0.025em;
+  }
+
+  /* Fix for Vanta background */
+  #home {
+    position: relative;
+    height: 100vh;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  #home > div {
+    height: 100%;
+    width: 100%;
+  }
+
+  canvas {
+    touch-action: none;
+  }
+
+  section {
+    padding: 5rem 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 
 @layer components {
+  /* Add these styles to ensure content visibility */
+  .vanta-canvas {
+    position: absolute !important;
+    top: 0;
+    left: 0;
+    height: 100% !important;
+    width: 100% !important;
+    z-index: -100 !important;
+    opacity: 0.5 !important;
+  }
+
+  /* Enhance text visibility */
+  .text-shadow-light {
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  }
+
+  .text-shadow-dark {
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  }
+
   /* Enhanced glassmorphic and neumorphic styles */
   .glassmorphic-card-advanced {
     @apply bg-white/10 dark:bg-black/10 backdrop-blur-md border border-white/20 dark:border-black/20 transition-all duration-300;
@@ -216,12 +272,6 @@
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   }
 
-  /* Floating icon styles */
-  .glassmorphic-icon {
-    @apply bg-white/5 dark:bg-black/5 backdrop-blur-sm rounded-full;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  }
-
   /* Hero text styles */
   .hero-text {
     background: linear-gradient(to right, #000, #333, #666, #999, #ccc, #fff, #ccc, #999, #666, #333, #000);
@@ -302,4 +352,73 @@
   .nav-link:hover::after {
     @apply w-full;
   }
+
+  /* Typewriter cursor */
+  .typewriter-cursor {
+    @apply inline-block w-1 h-5 bg-black dark:bg-white;
+    animation: blink 0.7s infinite;
+  }
+
+  @keyframes blink {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0;
+    }
+  }
+
+  /* Enhanced 3D text styles */
+  .text-3d {
+    color: #ffffff;
+    text-shadow:
+      0 1px 0 #cccccc,
+      0 2px 0 #c9c9c9,
+      0 3px 0 #bbbbbb,
+      0 4px 0 #b9b9b9,
+      0 5px 0 #aaaaaa,
+      0 6px 1px rgba(0, 0, 0, 0.1),
+      0 0 5px rgba(0, 0, 0, 0.1),
+      0 1px 3px rgba(0, 0, 0, 0.3),
+      0 3px 5px rgba(0, 0, 0, 0.2),
+      0 5px 10px rgba(0, 0, 0, 0.25),
+      0 10px 10px rgba(0, 0, 0, 0.2),
+      0 20px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  .dark .text-3d {
+    color: #ffffff;
+    text-shadow:
+      0 1px 0 #333333,
+      0 2px 0 #444444,
+      0 3px 0 #555555,
+      0 4px 0 #666666,
+      0 5px 0 #777777,
+      0 6px 1px rgba(0, 0, 0, 0.5),
+      0 0 5px rgba(0, 0, 0, 0.5),
+      0 1px 3px rgba(0, 0, 0, 0.7),
+      0 3px 5px rgba(0, 0, 0, 0.6),
+      0 5px 10px rgba(0, 0, 0, 0.5),
+      0 10px 10px rgba(0, 0, 0, 0.4),
+      0 20px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Floating animation */
+  @keyframes float {
+    0% {
+      transform: translateY(0px) rotate(0deg);
+    }
+    50% {
+      transform: translateY(-10px) rotate(1deg);
+    }
+    100% {
+      transform: translateY(0px) rotate(0deg);
+    }
+  }
+
+  .floating-animation {
+    animation: float 4s ease-in-out infinite;
+  }
 }
+

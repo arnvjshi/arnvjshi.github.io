@@ -1,5 +1,5 @@
 {
-  "name": "arnavjoshi",
+  "name": "my-v0-project",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -45,7 +45,7 @@
     "embla-carousel-react": "8.5.1",
     "input-otp": "1.4.1",
     "lucide-react": "^0.454.0",
-    "next": "^15.2.2",
+    "next": "15.1.0",
     "next-themes": "latest",
     "react": "^19",
     "react-day-picker": "8.10.1",
@@ -59,11 +59,19 @@
     "vaul": "^0.9.6",
     "zod": "^3.24.1",
     "@emotion/is-prop-valid": "latest",
-    "framer-motion": "latest",
-    "vanta": "latest",
+    "expo": "latest",
+    "expo-asset": "latest",
+    "expo-file-system": "latest",
+    "expo-gl": "latest",
+    "react-native": "latest",
     "three": "latest",
+    "@react-three/fiber": "latest",
+    "framer-motion": "latest",
     "gsap": "latest",
-    "@motionone/utils": "latest"
+    "vanta": "latest",
+    "@motionone/utils": "latest",
+    "@react-three/drei": "latest",
+    "react-intersection-observer": "latest"
   },
   "devDependencies": {
     "@types/node": "^22",

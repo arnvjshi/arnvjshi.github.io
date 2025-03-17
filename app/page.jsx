@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react"
 import { motion, useScroll, useTransform } from "framer-motion"
 import { gsap } from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
+import { useTheme } from "next-themes"
 import CustomCursor from "@/components/custom-cursor"
 import Navbar from "@/components/navbar"
 import About from "@/components/about"
@@ -13,10 +14,11 @@ import Experience from "@/components/experience"
 import Contact from "@/components/contact"
 import LoadingScreen from "@/components/loading-screen"
 import { ThemeProvider } from "@/components/theme-provider"
-//import FloatingIcons from "@/components/floating-icons"
 import VantaBackground from "@/components/vanta-background"
-import ParallaxText from "@/components/parallax-text"
-//import Typography from "@/components/typography"
+import TypewriterEffect from "@/components/typewriter-effect"
+import Chatbot from "@/components/chatbot"
+import BrushStrokes from "@/components/brush-strokes"
+import ProfileSection from "@/components/profile-section"
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -24,6 +26,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true)
   const { scrollYProgress } = useScroll()
   const mainRef = useRef(null)
+  const { theme } = useTheme()
 
   // Parallax effect for hero section
   const y = useTransform(scrollYProgress, [0, 0.5], [0, -150])
@@ -76,11 +79,10 @@ export default function Home() {
 
   return (
     <ThemeProvider defaultTheme="dark" attribute="class">
+      <title>Arnav Joshi</title>
       <div className="relative min-h-screen bg-gradient-to-b from-white to-gray-100 dark:from-black dark:to-gray-900 text-black dark:text-white overflow-hidden">
-        <title>Arnav Joshi</title>
         <CustomCursor />
         <Navbar />
-  {/* <FloatingIcons /> */}
 
         {/* Progress bar */}
         <motion.div
@@ -90,65 +92,62 @@ export default function Home() {
 
         <main ref={mainRef} className="relative z-10">
           {/* Hero Section */}
-          <section id="home" className="min-h-screen relative overflow-hidden">
-            <VantaBackground ></VantaBackground>
-              <div className="flex items-center justify-center min-h-screen px-4">
-                <motion.div className="text-center" style={{ y, opacity }}>
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, delay: 0.2 }}
-                  >
-                    <h2 className="text-xl md:text-2xl font-light mb-2 tracking-widest">Hello, I'm</h2>
-                  </motion.div>
-
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 1, delay: 0.5 }}
-                  >
-                    <div className="relative mx-auto w-32 h-32 md:w-40 md:h-40 mb-6 overflow-hidden rounded-full neumorphic-profile">
-                      <img
-                        src="/placeholder.svg?height=160&width=160"
-                        alt="Arnav Joshi"
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-transparent to-white/20 dark:to-white/10"></div>
-                    </div>
-
-                    <ParallaxText baseVelocity={-1}>
-                      <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 tracking-tighter hero-text">
-                        Arnav Joshi
-                      </h1>
-                    </ParallaxText>
-                  </motion.div>
+          <section id="home" className="min-h-screen relative">
+            <VantaBackground>
+              <div className="flex items-center justify-center min-h-screen px-4 relative z-10">
+                <motion.div
+                  className="text-center w-full max-w-5xl mx-auto bg-black/10 dark:bg-white/5 backdrop-blur-sm p-8 rounded-xl"
+                  style={{ y, opacity }}
+                >
+                  <ProfileSection />
 
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.8, delay: 1 }}
+                    className="flex flex-col items-center justify-center mt-8"
                   >
-                    <p className="text-lg md:text-xl mb-8 max-w-2xl mx-auto leading-relaxed">
-                      Full-stack developer specializing in modern web technologies and AI solutions
-                    </p>
+                    <div className="h-8 mb-4">
+                      <TypewriterEffect
+                        words={[
+                          "I'm a Web Developer",
+                          "I'm an ML Enthusiast",
+                          "I'm a Full-Stack Engineer",
+                          "I'm a UI/UX Designer",
+                          "I'm a Problem Solver",
+                        ]}
+                        speed={80}
+                        delay={2000}
+                      />
+                    </div>
                   </motion.div>
 
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8, delay: 1.3 }}
-                    className="flex flex-wrap gap-4 justify-center"
+                    className="flex flex-wrap gap-4 justify-center mt-8"
                   >
-                    <button className="neumorphic-btn-3d px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:bg-gray-200 dark:hover:bg-gray-700">
+                    <motion.button
+                      className="neumorphic-btn-3d px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
                       View Projects
-                    </button>
-                    <button className="glassmorphic-btn-advanced px-6 py-3 rounded-lg font-medium">Contact Me</button>
+                    </motion.button>
+                    <motion.button
+                      className="glassmorphic-btn-advanced px-6 py-3 rounded-lg font-medium"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      Contact Me
+                    </motion.button>
                   </motion.div>
                 </motion.div>
               </div>
 
               <motion.div
-                className="absolute bottom-10 left-1/2 transform -translate-x-1/2 flex flex-col items-center"
+                className="absolute bottom-10 left-1/2 transform -translate-x-1/2 flex flex-col items-center z-10"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 2, duration: 1 }}
@@ -166,14 +165,22 @@ export default function Home() {
                   />
                 </motion.div>
               </motion.div>
+            </VantaBackground>
           </section>
 
-          <About />
-          <Skills />
-          <Projects />
-          <Experience />
-          <Contact />
+          {/* Add brush strokes to the body sections */}
+          <div className="relative">
+            <BrushStrokes />
+            <div className="container mx-auto px-4">
+              <About />
+              <Skills />
+              <Projects />
+              <Experience />
+              <Contact />
+            </div>
+          </div>
         </main>
+        <Chatbot />
       </div>
     </ThemeProvider>
   )

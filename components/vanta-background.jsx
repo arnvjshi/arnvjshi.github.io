@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState, useRef } from "react"
-import WAVES from "vanta/dist/vanta.waves.min"
+import NET from "vanta/dist/vanta.net.min"
 import * as THREE from "three"
 
 export default function VantaBackground({ children }) {
@@ -11,7 +11,7 @@ export default function VantaBackground({ children }) {
   useEffect(() => {
     if (!vantaEffect) {
       setVantaEffect(
-        WAVES({
+        NET({
           el: vantaRef.current,
           THREE: THREE,
           mouseControls: true,
@@ -21,11 +21,11 @@ export default function VantaBackground({ children }) {
           minWidth: 200.0,
           scale: 1.0,
           scaleMobile: 1.0,
-          color: 0x10101,
-          shininess: 105.0,
-          waveHeight: 31.0,
-          waveSpeed: 1.05,
-          zoom: 0.82,
+          color: 0x3f3f3f,
+          backgroundColor: 0x0,
+          points: 10,
+          maxDistance: 25.0,
+          spacing: 15.0,
         }),
       )
     }
@@ -36,9 +36,9 @@ export default function VantaBackground({ children }) {
   }, [vantaEffect])
 
   return (
-    <div className="relative w-full h-full">
-      <div ref={vantaRef} className="absolute inset-0 z-0" />
-      <div className="relative z-10">{children}</div>
+    <div className="absolute inset-0 w-full h-full">
+      <div ref={vantaRef} className="absolute inset-0 w-full h-full z-[-100] opacity-50" />
+      {children}
     </div>
   )
 }

@@ -4,71 +4,92 @@ import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 
 export default function CustomCursor() {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
-  const [cursorVariant, setCursorVariant] = useState("default")
+  const [position, setPosition] = useState({ x: 0, y: 0 })
+  const [clicked, setClicked] = useState(false)
+  const [linkHovered, setLinkHovered] = useState(false)
+  const [hidden, setHidden] = useState(true)
 
   useEffect(() => {
-    const mouseMove = (e) => {
-      setMousePosition({
-        x: e.clientX,
-        y: e.clientY,
+    const addEventListeners = () => {
+      document.addEventListener("mousemove", onMouseMove)
+      document.addEventListener("mouseenter", onMouseEnter)
+      document.addEventListener("mouseleave", onMouseLeave)
+      document.addEventListener("mousedown", onMouseDown)
+      document.addEventListener("mouseup", onMouseUp)
+    }
+
+    const removeEventListeners = () => {
+      document.removeEventListener("mousemove", onMouseMove)
+      document.removeEventListener("mouseenter", onMouseEnter)
+      document.removeEventListener("mouseleave", onMouseLeave)
+      document.removeEventListener("mousedown", onMouseDown)
+      document.removeEventListener("mouseup", onMouseUp)
+    }
+
+    const onMouseMove = (e) => {
+      setPosition({ x: e.clientX, y: e.clientY })
+    }
+
+    const onMouseEnter = () => {
+      setHidden(false)
+    }
+
+    const onMouseLeave = () => {
+      setHidden(true)
+    }
+
+    const onMouseDown = () => {
+      setClicked(true)
+    }
+
+    const onMouseUp = () => {
+      setClicked(false)
+    }
+
+    const handleLinkHoverEvents = () => {
+      document.querySelectorAll('a, button, [role="button"]').forEach((el) => {
+        el.addEventListener("mouseenter", () => setLinkHovered(true))
+        el.addEventListener("mouseleave", () => setLinkHovered(false))
       })
     }
 
-    window.addEventListener("mousemove", mouseMove)
-
-    // Add event listeners for interactive elements
-    const interactiveElements = document.querySelectorAll('a, button, input, textarea, [role="button"]')
-
-    interactiveElements.forEach((el) => {
-      el.addEventListener("mouseenter", () => setCursorVariant("hover"))
-      el.addEventListener("mouseleave", () => setCursorVariant("default"))
-    })
+    addEventListeners()
+    handleLinkHoverEvents()
 
     return () => {
-      window.removeEventListener("mousemove", mouseMove)
-
-      interactiveElements.forEach((el) => {
-        el.removeEventListener("mouseenter", () => setCursorVariant("hover"))
-        el.removeEventListener("mouseleave", () => setCursorVariant("default"))
-      })
+      removeEventListeners()
     }
   }, [])
-
-  const variants = {
-    default: {
-      x: mousePosition.x - 16,
-      y: mousePosition.y - 16,
-      height: 32,
-      width: 32,
-    },
-    hover: {
-      x: mousePosition.x - 30,
-      y: mousePosition.y - 30,
-      height: 60,
-      width: 60,
-    },
-  }
 
   return (
     <>
       <motion.div
-        className="cursor-dot hidden md:block fixed top-0 left-0 z-50 rounded-full bg-black dark:bg-white mix-blend-difference pointer-events-none"
-        variants={variants}
-        animate={cursorVariant}
-        transition={{ type: "spring", stiffness: 500, damping: 28 }}
+        className={`fixed top-0 left-0 w-8 h-8 rounded-full border-2 border-primary z-[9999] pointer-events-none ${hidden ? "opacity-0" : "opacity-100"}`}
+        animate={{
+          x: position.x - 16,
+          y: position.y - 16,
+          scale: clicked ? 0.8 : linkHovered ? 1.5 : 1,
+        }}
+        transition={{
+          type: "spring",
+          stiffness: 500,
+          damping: 28,
+          mass: 0.5,
+        }}
       />
-      <style jsx global>{`
-        body {
-          cursor: none;
-        }
-        
-        @media (max-width: 768px) {
-          body {
-            cursor: auto;
-          }
-        }
-      `}</style>
+      <motion.div
+        className={`fixed top-0 left-0 w-2 h-2 bg-primary rounded-full z-[9999] pointer-events-none ${hidden ? "opacity-0" : "opacity-100"}`}
+        animate={{
+          x: position.x - 4,
+          y: position.y - 4,
+          scale: clicked ? 1.5 : 1,
+        }}
+        transition={{
+          type: "spring",
+          stiffness: 1500,
+          damping: 30,
+        }}
+      />
     </>
   )
 }

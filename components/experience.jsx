@@ -11,24 +11,24 @@ export default function Experience() {
   const experiences = [
     {
       title: "Rotaract Club",
-      role: "Technical Co-ordinator",
-      period: "2024 - Present",
+      role: "Technical Lead",
+      period: "2022 - Present",
       description:
         "Led the technical team in developing and maintaining the club's website and digital presence. Organized technical workshops and events for members.",
       icon: <Users className="w-6 h-6" />,
     },
     {
-      title: "CompEx 2025",
-      role: "Tech Inter & Event Organizer",
-      period: "2025",
+      title: "CompEx",
+      role: "Event Organizer",
+      period: "2021 - 2022",
       description:
         "Coordinated and managed technical competitions and hackathons. Developed judging systems and participant management platforms.",
       icon: <Calendar className="w-6 h-6" />,
     },
     {
       title: "Colosseum 15.0",
-      role: "Technical CoHead",
-      period: "2025",
+      role: "Technical Coordinator",
+      period: "2020",
       description:
         "Managed the technical aspects of the annual tech fest. Developed registration systems and coordinated with sponsors for technical workshops.",
       icon: <Award className="w-6 h-6" />,
