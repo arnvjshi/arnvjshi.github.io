@@ -35,9 +35,9 @@ export default function Projects() {
       demo: "#",
     },
     {
-      title: "Software Engineering Lab Assignments",
+      title: "CyberLab",
       description:
-        'A collection of academic projects showcasing various software engineering principles and patterns "A collection of academic projects showcasing various software engineering principles and patterns.',
+        'A software to book and manage lab appointments, track equipment usage, and generate reports for research labs.',
       technologies: ["Java", "Python", "Design Patterns"],
       image: "/placeholder.svg?height=400&width=600",
       github: "#",
