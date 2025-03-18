@@ -32,21 +32,36 @@ export default function Contact() {
   }
 
   const handleSubmit = (e) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-
-    // Simulate form submission
-    setTimeout(() => {
-      setIsSubmitting(false)
-      setIsSubmitted(true)
-      setFormState({ name: "", email: "", message: "" })
-
-      // Reset success message after 5 seconds
-      setTimeout(() => {
-        setIsSubmitted(false)
-      }, 5000)
-    }, 1500)
-  }
+    e.preventDefault();
+    setIsSubmitting(true);
+  
+    const formUrl =
+      "https://docs.google.com/forms/d/e/1FAIpQLSf-Ftv4Mt3YX9puPlulHwhIgo-w8dqf69dDbR5NDP6wDkv5Hg/formResponse";
+  
+    const formData = new FormData();
+    formData.append("entry.578838710", formState.name); // Name
+    formData.append("entry.811746656", formState.email); // Email
+    formData.append("entry.1900870639", formState.message); // Message
+    console.log(formState.name, formState.email, formState.message);
+  
+    fetch(formUrl, {
+      method: "POST",
+      mode: "no-cors",
+      body: formData,
+    })
+      .then(() => {
+        setIsSubmitting(false);
+        setIsSubmitted(true);
+        setFormState({ name: "", email: "", message: "" });
+  
+        setTimeout(() => setIsSubmitted(false), 5000);
+      })
+      .catch((error) => {
+        console.error("Form submission error:", error);
+        setIsSubmitting(false);
+      });
+  };
+  
 
   const containerVariants = {
     hidden: { opacity: 0 },

@@ -80,6 +80,7 @@ export default function Home() {
   return (
     <ThemeProvider defaultTheme="dark" attribute="class">
       <title>Arnav Joshi</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1"></meta>
       <div className="relative min-h-screen bg-gradient-to-b from-white to-gray-100 dark:from-black dark:to-gray-900 text-black dark:text-white overflow-hidden">
         <CustomCursor />
         <Navbar />
@@ -145,16 +146,17 @@ export default function Home() {
                   </motion.div>
                 </motion.div>
               </div>
-
-              <motion.div
-                className="absolute bottom-10 left-1/2 transform -translate-x-1/2 flex flex-col items-center z-10"
+                      <br></br>
+                      <br></br>
+              {/*<motion.div
+                className="absolute bottom-10 left-3 transform -translate-x-1/2 flex flex-col items-center z-10"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 2, duration: 1 }}
               >
-                <p className="text-sm mb-2">Scroll Down</p>
+                <p className="text-sm text-gray-400 dark:text-gray-600 align-left">Scroll down to explore</p>
                 <motion.div
-                  className="w-6 h-10 border-2 border-gray-400 dark:border-gray-600 rounded-full flex justify-center"
+                  className="w-6 h-10 border-2 border-gray-400 dark:border-gray-600 rounded-full flex justify-center "
                   animate={{ y: [0, 10, 0] }}
                   transition={{ repeat: Number.POSITIVE_INFINITY, duration: 1.5 }}
                 >
@@ -164,7 +166,7 @@ export default function Home() {
                     transition={{ repeat: Number.POSITIVE_INFINITY, duration: 1.5 }}
                   />
                 </motion.div>
-              </motion.div>
+              </motion.div>*/}
             </VantaBackground>
           </section>
 

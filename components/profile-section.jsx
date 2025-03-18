@@ -11,11 +11,9 @@ export default function ProfileSection() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.2 }}
       >
-        <h2 className="text-xl md:text-2xl font-light mb-4 tracking-widest text-center text-white dark:text-white">
-          Hello, I'm
-        </h2>
       </motion.div>
-
+      <br></br>
+      <br></br>
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -36,11 +34,11 @@ export default function ProfileSection() {
             transition={{ duration: 0.8, delay: 1 }}
             className="mt-4"
           >
-            <div className="h-8 mb-4 flex justify-center">
+            {/*<div className="h-8 mb-4 flex justify-center">
               <span className="text-lg md:text-xl font-medium text-white dark:text-white">
                 Full-Stack Developer & ML Enthusiast
               </span>
-            </div>
+            </div>*/}
             <p className="text-base md:text-lg max-w-xl text-center text-white dark:text-white">
               I'm a passionate developer with expertise in modern web technologies and AI solutions. I create intuitive,
               responsive applications that solve real-world problems with clean, efficient code and thoughtful design.
