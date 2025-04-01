@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react"
 import { motion, useInView } from "framer-motion"
-import { Mail, Github, Linkedin, Send, Instagram } from "lucide-react"
+import { Mail, Github, Linkedin, Send, Instagram, StickyNote } from "lucide-react"
 
 export default function Contact() {
   const sectionRef = useRef(null)
@@ -107,6 +107,12 @@ export default function Contact() {
       href: "https://instagram.com/arnv_jshi",
       label: "instagram.com/arnv_jshi",
     },
+    {
+      name: "Resume",
+      icon: <StickyNote className="w-5 h-5" />,
+      href: "https://raw.githubusercontent.com/arnvjshi/arnvjshi/main/Resume.pdf",
+      label: "Download Resume",
+    }
     
   ]
 
