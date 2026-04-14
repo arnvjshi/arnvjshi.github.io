@@ -117,6 +117,272 @@
 }
 
 @layer components {
+  .scene-shell {
+    position: relative;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  .scene-pin {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .scene-track {
+    display: flex;
+    flex-wrap: nowrap;
+    width: max-content;
+    height: 100vh;
+    will-change: transform;
+  }
+
+  .scene-panel {
+    position: relative;
+    flex: 0 0 100vw;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .scene-floating {
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    transform-origin: center;
+  }
+
+  .scene-floating:active {
+    cursor: grabbing;
+  }
+
+  .scene-note {
+    @apply bg-white/10 dark:bg-black/15 backdrop-blur-md border border-white/20 dark:border-white/10 rounded-2xl;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.18);
+  }
+
+  .scene-card-shell {
+    max-height: calc(100vh - 6.9rem);
+    overflow-y: auto;
+    padding-right: 8px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    mask-image: linear-gradient(to bottom, transparent 0, black 16px, black calc(100% - 16px), transparent 100%);
+  }
+  .scene-card-shell::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+
+  .scene-card-shell::-webkit-scrollbar-thumb {
+    background: transparent;
+  }
+
+  .scene-card-shell::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scene-card-shell::after {
+    content: "";
+    position: sticky;
+    bottom: 0;
+    display: block;
+    height: 24px;
+    margin-top: -24px;
+    pointer-events: none;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(148, 163, 184, 0.08));
+  }
+
+  .pretext-chip {
+    @apply px-3 py-1.5 rounded-full text-xs md:text-sm uppercase tracking-[0.24em] bg-white/40 dark:bg-white/10 border border-white/30 dark:border-white/15;
+    line-height: 1;
+  }
+
+  .pretext-chip:hover {
+    @apply bg-white/60 dark:bg-white/20 border-white/50 dark:border-white/40;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  }
+
+  .pretext-strip {
+    @apply flex flex-wrap gap-2 items-center;
+  }
+
+  .pretext-chip p,
+  .pretext-chip i,
+  .pretext-chip b,
+  .pretext-chip em,
+  .pretext-chip strong {
+    margin: 0;
+    display: inline;
+  }
+
+  .pretext-inline {
+    @apply text-[11px] md:text-xs uppercase tracking-[0.3em] opacity-65;
+  }
+
+  .scene-orb {
+    @apply absolute rounded-full border border-white/30 dark:border-white/10 backdrop-blur-md shadow-md;
+    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.55), rgba(148, 163, 184, 0.2));
+  }
+
+  .scene-orb:hover {
+    box-shadow: 0 0 20px rgba(148, 163, 184, 0.35), 0 0 36px rgba(148, 163, 184, 0.15);
+  }
+
+  .pretext-wrap-ball {
+    float: left;
+    shape-outside: circle(50%);
+    width: 96px;
+    height: 96px;
+    margin: 8px 16px 8px 0;
+    border-radius: 999px;
+    border: 1px solid rgba(203, 213, 225, 0.42);
+    background: rgba(15, 23, 42, 0.22);
+    color: rgba(226, 232, 240, 0.92);
+    display: grid;
+    place-items: center;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    backdrop-filter: blur(8px);
+  }
+
+  .pretext-wrap-ball-right {
+    float: right;
+    margin: 12px 0 8px 16px;
+  }
+
+  .pretext-wrap-ball-left {
+    float: left;
+  }
+
+  .orb-1 {
+    width: 68px;
+    height: 68px;
+    top: 16%;
+    left: 7%;
+  }
+
+  .orb-2 {
+    width: 54px;
+    height: 54px;
+    top: 27%;
+    right: 10%;
+  }
+
+  .orb-3 {
+    width: 42px;
+    height: 42px;
+    top: 58%;
+    left: 12%;
+  }
+
+  .orb-4 {
+    width: 88px;
+    height: 88px;
+    bottom: 14%;
+    right: 20%;
+  }
+
+  .orb-5 {
+    width: 34px;
+    height: 34px;
+    bottom: 24%;
+    left: 35%;
+  }
+
+  .scene-hud {
+    @apply bg-white/15 dark:bg-black/25 backdrop-blur-xl border border-white/25 dark:border-white/10 rounded-3xl;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
+  }
+
+  .scene-scrubber {
+    @apply relative h-2 rounded-full overflow-hidden bg-black/10 dark:bg-white/10;
+  }
+
+  .scene-scrubber-fill {
+    @apply absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-gray-400 via-gray-200 to-gray-500 dark:from-gray-600 dark:via-gray-300 dark:to-gray-500;
+    width: 100%;
+    transform-origin: 0%;
+  }
+
+  .scene-mini-dot {
+    @apply bg-white/30 dark:bg-white/10 border border-white/20 dark:border-white/10 text-[11px] uppercase tracking-[0.2em] transition-all duration-200;
+  }
+
+  .scene-mini-dot.is-active {
+    @apply bg-white/70 dark:bg-white/20 border-white/50 dark:border-white/25;
+  }
+
+  .scene-toy {
+    @apply rounded-2xl border border-white/25 dark:border-white/10 backdrop-blur-md shadow-lg;
+  }
+
+  .scene-toy-yellow {
+    @apply bg-[#d8d0a8]/75 dark:bg-[#6a6342]/70 text-black dark:text-white;
+  }
+
+  .scene-toy-slate {
+    @apply bg-slate-200/70 dark:bg-slate-700/70 text-slate-900 dark:text-slate-100;
+  }
+
+  .scene-toy-ice {
+    @apply bg-cyan-100/70 dark:bg-cyan-900/45 text-cyan-900 dark:text-cyan-50;
+  }
+
+  .scene-toy-graphite {
+    @apply bg-zinc-300/70 dark:bg-zinc-800/70 text-zinc-900 dark:text-zinc-100;
+  }
+
+  .scene-floating:nth-child(3n + 1) {
+    transform: rotate(-1deg);
+  }
+
+  .scene-floating:nth-child(3n + 2) {
+    transform: rotate(1deg);
+  }
+
+  .scene-teleport-overlay {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 35;
+    background:
+      radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0) 42%),
+      linear-gradient(120deg, rgba(148, 163, 184, 0.07), rgba(51, 65, 85, 0.05));
+    mix-blend-mode: screen;
+  }
+
+  @media (max-width: 900px) {
+    .scene-panel {
+      height: 100dvh;
+      padding-top: 4.6rem;
+      padding-bottom: 0.8rem;
+    }
+
+    .scene-card-shell {
+      max-height: calc(100dvh - 6.8rem);
+      overflow-y: auto;
+      scrollbar-width: none;
+    }
+
+    .scene-note {
+      border-radius: 1.25rem;
+    }
+
+    .pretext-chip {
+      @apply text-[10px] tracking-[0.2em] px-2.5 py-1;
+    }
+
+    .pretext-wrap-ball {
+      width: 72px;
+      height: 72px;
+      font-size: 10px;
+      margin: 6px 10px 6px 0;
+    }
+  }
+
   /* Add these styles to ensure content visibility */
   .vanta-canvas {
     position: absolute !important;
@@ -314,7 +580,6 @@
     font-size: 64px;
     display: flex;
     white-space: nowrap;
-    display: flex;
     flex-wrap: nowrap;
   }
 

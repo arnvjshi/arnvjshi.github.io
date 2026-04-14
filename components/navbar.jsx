@@ -5,50 +5,23 @@ import { motion } from "framer-motion"
 import { useTheme } from "next-themes"
 import { Sun, Moon, Menu, X } from "lucide-react"
 
-export default function Navbar() {
+// eslint-disable-next-line react/prop-types
+export default function Navbar({ activeSection = "home", onNavigate = () => {}, scrolled = false }) {
   const [isOpen, setIsOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
-  const [activeSection, setActiveSection] = useState("home")
-  const [scrolled, setScrolled] = useState(false)
   const { theme, setTheme } = useTheme()
 
   useEffect(() => {
     setMounted(true)
-
-    // Add scroll event listener to track active section and navbar background
-    const handleScroll = () => {
-      const sections = document.querySelectorAll("section[id]")
-      const scrollPosition = window.scrollY + 100
-
-      // Change navbar background on scroll
-      if (scrollPosition > 50) {
-        setScrolled(true)
-      } else {
-        setScrolled(false)
-      }
-
-      sections.forEach((section) => {
-        const sectionTop = section.offsetTop
-        const sectionHeight = section.offsetHeight
-        const sectionId = section.getAttribute("id")
-
-        if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
-          setActiveSection(sectionId)
-        }
-      })
-    }
-
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
   const navItems = [
-    { name: "Home", href: "#home" },
-    { name: "About", href: "#about" },
-    { name: "Skills", href: "#skills" },
-    { name: "Projects", href: "#projects" },
-    { name: "Experience", href: "#experience" },
-    { name: "Contact", href: "#contact" },
+    { name: "Home", id: "home" },
+    { name: "About", id: "about" },
+    { name: "Skills", id: "skills" },
+    { name: "Projects", id: "projects" },
+    { name: "Experience", id: "experience" },
+    { name: "Contact", id: "contact" },
   ]
 
   const toggleTheme = () => {
@@ -65,7 +38,13 @@ export default function Navbar() {
       }`}
     >
       <div className="container mx-auto flex justify-between items-center">
-        <motion.a href="#home" className="relative group" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+        <motion.button
+          type="button"
+          onClick={() => onNavigate(0)}
+          className="relative group"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
           <span className="text-2xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-400">
             ArnavJ
           </span>
@@ -73,7 +52,7 @@ export default function Navbar() {
             className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-gray-400 to-gray-600 dark:from-gray-400 dark:to-gray-200 group-hover:w-full transition-all duration-300"
             whileHover={{ width: "100%" }}
           />
-        </motion.a>
+        </motion.button>
 
         {/* Mobile menu button */}
         <div className="md:hidden">
@@ -91,24 +70,25 @@ export default function Navbar() {
         {/* Desktop menu */}
         <div className="hidden md:flex items-center space-x-8">
           {navItems.map((item) => (
-            <motion.a
-              key={item.name}
-              href={item.href}
+            <motion.button
+              type="button"
+              key={item.id}
+              onClick={() => onNavigate(navItems.findIndex((navItem) => navItem.id === item.id))}
               className={`relative text-sm font-medium nav-link ${
-                activeSection === item.href.substring(1) ? "active-nav-link" : ""
+                activeSection === item.id ? "active-nav-link" : ""
               }`}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
               {item.name}
-              {activeSection === item.href.substring(1) && (
+              {activeSection === item.id && (
                 <motion.span
                   className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-gray-400 to-gray-600 dark:from-gray-400 dark:to-gray-200"
                   layoutId="activeSection"
                   transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 />
               )}
-            </motion.a>
+            </motion.button>
           ))}
         </div>
 
@@ -137,19 +117,22 @@ export default function Navbar() {
         >
           <div className="flex flex-col space-y-4 px-4">
             {navItems.map((item) => (
-              <motion.a
-                key={item.name}
-                href={item.href}
-                className={`text-center py-2 ${activeSection === item.href.substring(1) ? "font-bold" : ""}`}
-                onClick={() => setIsOpen(false)}
-                whileHover={{
-                  backgroundColor: "rgba(200, 200, 200, 0.1)",
-                  scale: 1.02,
-                }}
-                transition={{ duration: 0.2 }}
-              >
-                {item.name}
-              </motion.a>
+                <motion.button
+                  type="button"
+                  key={item.id}
+                  className={`text-center py-2 ${activeSection === item.id ? "font-bold" : ""}`}
+                  onClick={() => {
+                    onNavigate(navItems.findIndex((navItem) => navItem.id === item.id))
+                    setIsOpen(false)
+                  }}
+                  whileHover={{
+                    backgroundColor: "rgba(200, 200, 200, 0.1)",
+                    scale: 1.02,
+                  }}
+                  transition={{ duration: 0.2 }}
+                >
+                  {item.name}
+                </motion.button>
             ))}
             {mounted && (
               <motion.button

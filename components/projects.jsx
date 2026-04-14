@@ -1,13 +1,49 @@
 "use client"
 
-import { useRef, useState } from "react"
-import { motion, useInView, AnimatePresence } from "framer-motion"
-import { ExternalLink, Github, ChevronLeft, ChevronRight } from "lucide-react"
+import { useMemo, useRef, useState } from "react"
+import { motion, useInView, AnimatePresence, useMotionValue, useSpring } from "framer-motion"
+import { ExternalLink, ChevronLeft, ChevronRight } from "lucide-react"
+import pretext from "pretext"
+
+// eslint-disable-next-line react/prop-types
+function PretextChip({ html }) {
+  const x = useMotionValue(0)
+  const y = useMotionValue(0)
+  const mx = useSpring(x, { stiffness: 245, damping: 15, mass: 0.28 })
+  const my = useSpring(y, { stiffness: 245, damping: 15, mass: 0.28 })
+
+  return (
+    <motion.span
+      className="pretext-chip"
+      style={{ x: mx, y: my }}
+      drag
+      dragElastic={0.1}
+      dragMomentum
+      whileHover={{ scale: 1.03, rotate: -1 }}
+      whileDrag={{ scale: 1.02, rotate: 1 }}
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
+  )
+}
 
 export default function Projects() {
   const sectionRef = useRef(null)
   const isInView = useInView(sectionRef, { once: false, amount: 0.1 })
   const [activeProject, setActiveProject] = useState(0)
+
+  const projectTokens = ["*projects*", "/drag/", "_drop_", "*play*"]
+  const renderedProjectTokens = useMemo(() => {
+    const parser = typeof pretext === "function" ? pretext : pretext?.default
+    if (!parser) return projectTokens
+
+    return projectTokens.map((token) => {
+      try {
+        return parser(token).replace(/^<p>/, "").replace(/<\/p>$/, "")
+      } catch {
+        return token
+      }
+    })
+  }, [])
 
   const projects = [
     {
@@ -90,16 +126,22 @@ export default function Projects() {
   }
 
   return (
-    <section id="projects" ref={sectionRef} className="min-h-screen py-20 px-4">
+    <section id="projects" ref={sectionRef} className="w-full py-8 px-2">
       <div className="container mx-auto max-w-6xl">
         <motion.h2
           initial={{ opacity: 0, y: -20 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: -20 }}
           transition={{ duration: 0.6 }}
-          className="text-3xl md:text-4xl font-bold text-center mb-16 bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-400"
+          className="text-3xl md:text-4xl font-bold text-center mb-10 bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-400"
         >
           Featured Projects
         </motion.h2>
+
+        <motion.div className="pretext-strip justify-center mb-6" initial={{ opacity: 0, y: 10 }} animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }} transition={{ duration: 0.4 }}>
+          {renderedProjectTokens.map((token) => (
+            <PretextChip key={token} html={token} />
+          ))}
+        </motion.div>
 
         {/* Mobile Project Carousel */}
         <div className="md:hidden relative">
@@ -111,8 +153,12 @@ export default function Projects() {
               exit={{ opacity: 0, x: -100 }}
               transition={{ duration: 0.3 }}
               className="glassmorphic-card-advanced rounded-xl overflow-hidden"
+              drag
+              dragElastic={0.1}
+              dragMomentum
+              whileDrag={{ rotate: -0.8, scale: 1.01 }}
             >
-              <div className="relative overflow-hidden h-48">
+              <motion.div className="relative overflow-hidden h-48" drag dragElastic={0.08} dragMomentum whileDrag={{ scale: 1.01, rotate: 0.25 }}>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10 flex items-end">
                   <h3 className="text-white text-xl font-bold p-4">{projects[activeProject].title}</h3>
                 </div>
@@ -121,14 +167,14 @@ export default function Projects() {
                   alt={projects[activeProject].title}
                   className="w-full h-full object-cover"
                 />
-              </div>
+              </motion.div>
 
               <div className="p-6">
                 <p className="mb-4">{projects[activeProject].description}</p>
 
                 <div className="flex flex-wrap gap-2 mb-4">
-                  {projects[activeProject].technologies.map((tech, techIndex) => (
-                    <span key={techIndex} className="text-xs px-2 py-1 rounded-full neumorphic-pill">
+                  {projects[activeProject].technologies.map((tech) => (
+                    <span key={tech} className="text-xs px-2 py-1 rounded-full neumorphic-pill">
                       {tech}
                     </span>
                   ))}
@@ -138,16 +184,24 @@ export default function Projects() {
                   <motion.a
                     href={projects[activeProject].github}
                     className="neumorphic-btn-3d p-2 rounded-lg"
+                    drag
+                    dragElastic={0.08}
+                    dragMomentum
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                     aria-label="View GitHub repository"
                   >
-                    <Github size={20} />
+                    <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-current/10 text-[10px] font-bold uppercase tracking-wider">
+                      gh
+                    </span>
                   </motion.a>
 
                   <motion.a
                     href={projects[activeProject].demo}
                     className="neumorphic-btn-3d p-2 rounded-lg"
+                    drag
+                    dragElastic={0.08}
+                    dragMomentum
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                     aria-label="View live demo"
@@ -163,6 +217,9 @@ export default function Projects() {
             <motion.button
               onClick={prevProject}
               className="neumorphic-btn-3d p-2 rounded-full"
+              drag
+              dragElastic={0.08}
+              dragMomentum
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
             >
@@ -170,13 +227,16 @@ export default function Projects() {
             </motion.button>
 
             <div className="flex space-x-2">
-              {projects.map((_, index) => (
+              {projects.map((project, index) => (
                 <motion.button
-                  key={index}
+                  key={project.title}
                   onClick={() => setActiveProject(index)}
                   className={`w-2 h-2 rounded-full ${
                     index === activeProject ? "bg-gray-800 dark:bg-gray-200" : "bg-gray-300 dark:bg-gray-700"
                   }`}
+                  drag
+                  dragElastic={0.08}
+                  dragMomentum
                   whileHover={{ scale: 1.2 }}
                 />
               ))}
@@ -185,6 +245,9 @@ export default function Projects() {
             <motion.button
               onClick={nextProject}
               className="neumorphic-btn-3d p-2 rounded-full"
+              drag
+              dragElastic={0.12}
+              dragMomentum
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
             >
@@ -198,13 +261,17 @@ export default function Projects() {
           variants={containerVariants}
           initial="hidden"
           animate={isInView ? "visible" : "hidden"}
-          className="hidden md:grid md:grid-cols-2 gap-8"
+          className="hidden md:grid md:grid-cols-2 gap-6"
         >
-          {projects.map((project, index) => (
+          {projects.map((project) => (
             <motion.div
-              key={index}
+              key={project.title}
               variants={itemVariants}
               className="glassmorphic-card-advanced rounded-xl overflow-hidden transform-gpu"
+              drag
+              dragElastic={0.1}
+              dragMomentum
+              whileDrag={{ rotate: -0.8, scale: 1.01 }}
               whileHover={{
                 y: -10,
                 scale: 1.02,
@@ -214,6 +281,9 @@ export default function Projects() {
             >
               <motion.div
                 className="relative overflow-hidden h-48 md:h-64"
+                drag
+                dragElastic={0.08}
+                dragMomentum
                 whileHover={{ scale: 1.05 }}
                 transition={{ duration: 0.5 }}
               >
@@ -231,6 +301,7 @@ export default function Projects() {
                   src={project.image}
                   alt={project.title}
                   className="w-full h-full object-cover"
+                  drag
                   whileHover={{
                     scale: 1.1,
                     filter: "brightness(0.8)",
@@ -244,9 +315,9 @@ export default function Projects() {
                 <p className="mb-4">{project.description}</p>
 
                 <div className="flex flex-wrap gap-2 mb-4">
-                  {project.technologies.map((tech, techIndex) => (
+                  {project.technologies.map((tech) => (
                     <motion.span
-                      key={techIndex}
+                      key={tech}
                       className="text-xs px-2 py-1 rounded-full neumorphic-pill"
                       whileHover={{
                         scale: 1.1,
@@ -256,7 +327,7 @@ export default function Projects() {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{
                         duration: 0.3,
-                        delay: 0.1 * techIndex,
+                        delay: 0.1 * project.technologies.indexOf(tech),
                       }}
                     >
                       {tech}
@@ -275,10 +346,15 @@ export default function Projects() {
                     whileTap={{ scale: 0.9 }}
                     aria-label="View GitHub repository"
                   >
-                    <Github size={20} />
+                    <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-current/10 text-[10px] font-bold uppercase tracking-wider">
+                      gh
+                    </span>
                   </motion.a>
 
                   <motion.a
+                    drag
+                    dragElastic={0.08}
+                    dragMomentum
                     href={project.demo}
                     className="neumorphic-btn-3d p-2 rounded-lg"
                     whileHover={{
@@ -292,6 +368,9 @@ export default function Projects() {
                   </motion.a>
                 </div>
               </div>
+                    drag
+                    dragElastic={0.12}
+                    dragMomentum
             </motion.div>
           ))}
         </motion.div>

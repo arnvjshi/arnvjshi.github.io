@@ -1,10 +1,9 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import { motion, useScroll, useTransform } from "framer-motion"
 import { gsap } from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
-import { useTheme } from "next-themes"
 import CustomCursor from "@/components/custom-cursor"
 import Navbar from "@/components/navbar"
 import About from "@/components/about"
@@ -24,16 +23,76 @@ gsap.registerPlugin(ScrollTrigger)
 
 export default function Home() {
   const [loading, setLoading] = useState(true)
+  const [activeSection, setActiveSection] = useState("home")
+  const [sceneProgress, setSceneProgress] = useState(0)
+  const [isTouch, setIsTouch] = useState(false)
+  const [teleportPulse, setTeleportPulse] = useState(0)
   const { scrollYProgress } = useScroll()
   const mainRef = useRef(null)
-  const { theme } = useTheme()
+  const sectionTrackRef = useRef(null)
+  const sectionShellRef = useRef(null)
+  const sectionScrollStartRef = useRef(0)
+  const sectionScrollStepRef = useRef(0)
+  const scrollRafRef = useRef(null)
 
-  // Parallax effect for hero section
   const y = useTransform(scrollYProgress, [0, 0.5], [0, -150])
   const opacity = useTransform(scrollYProgress, [0, 0.2], [1, 0])
 
+  const sceneSections = [
+    { id: "home", label: "Home" },
+    { id: "about", label: "About" },
+    { id: "skills", label: "Skills" },
+    { id: "projects", label: "Projects" },
+    { id: "experience", label: "Experience" },
+    { id: "contact", label: "Contact" },
+  ]
+
+  const clampIndex = (index) => Math.min(sceneSections.length - 1, Math.max(0, index))
+
+  const smoothScrollTo = (targetY, duration = 620) => {
+    if (globalThis.window === undefined) return
+
+    if (scrollRafRef.current) {
+      globalThis.cancelAnimationFrame(scrollRafRef.current)
+    }
+
+    const startY = globalThis.scrollY
+    const delta = targetY - startY
+    const startTime = performance.now()
+
+    const step = (now) => {
+      const elapsed = now - startTime
+      const progress = Math.min(1, elapsed / duration)
+      const eased = progress < 0.5 ? 4 * progress * progress * progress : 1 - Math.pow(-2 * progress + 2, 3) / 2
+
+      globalThis.scrollTo(0, startY + delta * eased)
+
+      if (progress < 1) {
+        scrollRafRef.current = globalThis.requestAnimationFrame(step)
+      }
+    }
+
+    scrollRafRef.current = globalThis.requestAnimationFrame(step)
+  }
+
+  const scrollToSection = (targetIndex) => {
+    const sectionIndex = clampIndex(targetIndex)
+    const targetSectionId = sceneSections[sectionIndex].id
+    const targetSection = document.getElementById(targetSectionId)
+    const targetScroll =
+      sectionScrollStepRef.current > 0
+        ? sectionScrollStartRef.current + sectionIndex * sectionScrollStepRef.current
+        : targetSection?.offsetTop || sectionShellRef.current?.offsetTop || 0
+
+    setTeleportPulse((prev) => prev + 1)
+    globalThis.setTimeout(() => {
+      smoothScrollTo(targetScroll, isTouch ? 470 : 650)
+    }, 90)
+
+    setActiveSection(targetSectionId)
+  }
+
   useEffect(() => {
-    // Loading screen
     const timer = setTimeout(() => {
       setLoading(false)
     }, 2500)
@@ -42,36 +101,112 @@ export default function Home() {
   }, [])
 
   useEffect(() => {
-    if (!loading) {
-      // GSAP animations for sections
-      const sections = document.querySelectorAll("section")
+    if (globalThis.window === undefined) return
 
-      sections.forEach((section) => {
+    const media = globalThis.matchMedia("(pointer: coarse), (max-width: 900px)")
+    const updateTouchMode = () => setIsTouch(media.matches)
+    updateTouchMode()
+    media.addEventListener("change", updateTouchMode)
+
+    return () => media.removeEventListener("change", updateTouchMode)
+  }, [])
+
+  useEffect(() => {
+    if (loading || !sectionShellRef.current || !sectionTrackRef.current) {
+      return
+    }
+
+    const ctx = gsap.context(() => {
+      const panels = gsap.utils.toArray(".scene-panel")
+      const totalWidth = Math.max(0, sectionTrackRef.current.scrollWidth - globalThis.innerWidth)
+      const sectionCount = Math.max(1, panels.length - 1)
+      sectionScrollStartRef.current = sectionShellRef.current.getBoundingClientRect().top + globalThis.scrollY
+      sectionScrollStepRef.current = sectionCount > 0 ? totalWidth / sectionCount : totalWidth
+
+      const horizontalTween = gsap.to(sectionTrackRef.current, {
+        x: () => -totalWidth,
+        ease: "none",
+        scrollTrigger: {
+          trigger: sectionShellRef.current,
+          start: "top top",
+          end: () => `+=${totalWidth}`,
+          scrub: 1.1,
+          pin: true,
+          anticipatePin: 2,
+          fastScrollEnd: true,
+          invalidateOnRefresh: true,
+          snap: {
+            snapTo: (value) => Math.round(value * sectionCount) / sectionCount,
+            duration: { min: 0.2, max: 0.75 },
+            delay: 0.03,
+            ease: "power2.inOut",
+            directional: true,
+          },
+          onUpdate: (self) => {
+            setSceneProgress(self.progress)
+            const activeIndex = clampIndex(Math.round(self.progress * sectionCount))
+            setActiveSection(sceneSections[activeIndex].id)
+          },
+        },
+      })
+
+      panels.forEach((panel, index) => {
+        const signatures = [
+          { from: { y: 22, rotate: -0.6, x: 0 }, to: { y: 0, rotate: 0, x: 0 } },
+          { from: { y: 10, rotate: 0.4, x: 24 }, to: { y: 0, rotate: 0, x: 0 } },
+          { from: { y: 24, rotate: -0.2, x: -20 }, to: { y: 0, rotate: 0, x: 0 } },
+          { from: { y: 14, rotate: 0.7, x: 14 }, to: { y: 0, rotate: 0, x: 0 } },
+          { from: { y: 26, rotate: -0.8, x: -12 }, to: { y: 0, rotate: 0, x: 0 } },
+          { from: { y: 18, rotate: 0.25, x: 18 }, to: { y: 0, rotate: 0, x: 0 } },
+        ]
+        const signature = signatures[index % signatures.length]
+
         gsap.fromTo(
-          section,
-          { opacity: 0, y: 50 },
+          panel,
+          { opacity: 0.4, scale: 0.96 },
           {
             opacity: 1,
-            y: 0,
-            duration: 1,
+            scale: 1,
+            ease: "power2.out",
             scrollTrigger: {
-              trigger: section,
-              start: "top 80%",
-              end: "bottom 20%",
+              trigger: panel,
+              containerAnimation: horizontalTween,
+              start: `left ${84 - Math.min(index * 4, 20)}%`,
+              end: "right 20%",
               toggleActions: "play none none reverse",
             },
           },
         )
-      })
 
-      // Animate the progress bar
-      gsap.to(".progress-bar", {
-        scaleX: 1,
-        duration: 1.5,
-        ease: "power2.out",
+        const panelCard = panel.querySelector(".scene-card-shell")
+        if (panelCard) {
+          gsap.fromTo(
+            panelCard,
+            { ...signature.from, opacity: 0.75, filter: "blur(2px)" },
+            {
+              ...signature.to,
+              opacity: 1,
+              filter: "blur(0px)",
+              ease: "power2.out",
+              scrollTrigger: {
+                trigger: panel,
+                containerAnimation: horizontalTween,
+                start: `left ${88 - Math.min(index * 3, 18)}%`,
+                end: "left 50%",
+                scrub: 0.7,
+              },
+            },
+          )
+        }
       })
-    }
+    }, sectionShellRef)
+
+    ScrollTrigger.refresh()
+
+    return () => ctx.revert()
   }, [loading])
+
+  const registerFloating = () => undefined
 
   if (loading) {
     return <LoadingScreen />
@@ -81,9 +216,16 @@ export default function Home() {
     <ThemeProvider defaultTheme="dark" attribute="class">
       <title>Arnav Joshi</title>
       <meta name="viewport" content="width=device-width, initial-scale=1"></meta>
-      <div className="relative min-h-screen bg-gradient-to-b from-white to-gray-100 dark:from-black dark:to-gray-900 text-black dark:text-white overflow-hidden">
+      <div className="scene-shell relative min-h-screen bg-gradient-to-b from-white to-gray-100 dark:from-black dark:to-gray-900 text-black dark:text-white overflow-hidden">
+        <motion.div
+          key={teleportPulse}
+          className="scene-teleport-overlay"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: [0, 0.22, 0], scale: [1, 1.02, 1] }}
+          transition={{ duration: 0.5, ease: "easeInOut" }}
+        />
         <CustomCursor />
-        <Navbar />
+        <Navbar activeSection={activeSection} onNavigate={scrollToSection} scrolled={sceneProgress > 0.02} />
 
         {/* Progress bar */}
         <motion.div
@@ -92,15 +234,25 @@ export default function Home() {
         />
 
         <main ref={mainRef} className="relative z-10">
-          {/* Hero Section */}
-          <section id="home" className="min-h-screen relative">
+          <div ref={sectionShellRef} className="scene-pin">
+            <div ref={sectionTrackRef} className="scene-track">
+          <section id="home" className="scene-panel relative">
             <VantaBackground>
               <div className="flex items-center justify-center min-h-screen px-4 relative z-10">
                 <motion.div
-                  className="text-center w-full max-w-5xl mx-auto bg-black/10 dark:bg-white/5 backdrop-blur-sm p-8 rounded-xl"
+                  className="scene-note scene-floating scene-card-shell text-center w-full max-w-5xl mx-auto bg-black/10 dark:bg-white/5 backdrop-blur-sm p-8 rounded-xl"
                   style={{ y, opacity }}
+                  ref={registerFloating}
+                  drag={!isTouch}
+                  dragElastic={0.08}
+                  dragSnapToOrigin
+                  dragMomentum
+                  dragTransition={{ power: 0.22, timeConstant: 180, bounceStiffness: 170, bounceDamping: 14 }}
+                  whileHover={{ scale: 1.01, rotate: -0.4 }}
+                  whileTap={{ scale: 0.99 }}
+                  whileDrag={{ rotate: 1.2, scale: 1.01 }}
                 >
-                  <ProfileSection />
+                  <ProfileSection isTouch={isTouch} />
 
                   <motion.div
                     initial={{ opacity: 0 }}
@@ -130,55 +282,89 @@ export default function Home() {
                     className="flex flex-wrap gap-4 justify-center mt-8"
                   >
                     <motion.button
-                      className="neumorphic-btn-3d px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+                      onClick={() => scrollToSection(2)}
+                      className="neumorphic-btn-3d px-8 py-3 rounded-lg font-medium transition-all duration-300 hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer group relative"
+                      drag={!isTouch}
+                      dragElastic={0.1}
+                      dragMomentum
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                     >
-                      View Projects
+                      <span className="inline-flex items-center gap-2">View Projects</span>
                     </motion.button>
                     <motion.button
-                      className="glassmorphic-btn-advanced px-6 py-3 rounded-lg font-medium"
+                      onClick={() => scrollToSection(5)}
+                      className="glassmorphic-btn-advanced px-8 py-3 rounded-lg font-medium cursor-pointer group relative"
+                      drag={!isTouch}
+                      dragElastic={0.1}
+                      dragMomentum
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                     >
-                      Contact Me
+                      <span className="inline-flex items-center gap-2">Contact Me</span>
                     </motion.button>
                   </motion.div>
+
                 </motion.div>
+
+                <div className="absolute inset-0 pointer-events-none z-0">
+                  {["1", "2", "3", "4", "5"].map((orb) => (
+                    <motion.div
+                      key={orb}
+                      className={`scene-orb orb-${orb} pointer-events-auto`}
+                      drag={!isTouch}
+                      dragElastic={0.12}
+                      dragMomentum
+                      dragTransition={{ power: 0.24, timeConstant: 180, bounceStiffness: 170, bounceDamping: 14 }}
+                      whileHover={{ scale: 1.1 }}
+                      whileDrag={{ scale: 1.14 }}
+                    />
+                  ))}
+                </div>
               </div>
-                      <br></br>
-                      <br></br>
-              {/*<motion.div
-                className="absolute bottom-10 left-3 transform -translate-x-1/2 flex flex-col items-center z-10"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 2, duration: 1 }}
-              >
-                <p className="text-sm text-gray-400 dark:text-gray-600 align-left">Scroll down to explore</p>
-                <motion.div
-                  className="w-6 h-10 border-2 border-gray-400 dark:border-gray-600 rounded-full flex justify-center "
-                  animate={{ y: [0, 10, 0] }}
-                  transition={{ repeat: Number.POSITIVE_INFINITY, duration: 1.5 }}
-                >
-                  <motion.div
-                    className="w-1 h-2 bg-gray-400 dark:bg-gray-600 rounded-full mt-2"
-                    animate={{ y: [0, 15, 0] }}
-                    transition={{ repeat: Number.POSITIVE_INFINITY, duration: 1.5 }}
-                  />
-                </motion.div>
-              </motion.div>*/}
             </VantaBackground>
           </section>
 
-          {/* Add brush strokes to the body sections */}
-          <div className="relative">
+          <section id="about" className="scene-panel relative">
             <BrushStrokes />
-            <div className="container mx-auto px-4">
-              <About />
-              <Skills />
-              <Projects />
-              <Experience />
-              <Contact />
+            <div className="container mx-auto px-4 h-full flex items-start pt-20 pb-4">
+              <motion.div className="scene-note scene-floating scene-card-shell w-full p-4 md:p-6" ref={registerFloating} drag={!isTouch} dragSnapToOrigin dragMomentum dragTransition={{ power: 0.24, timeConstant: 180, bounceStiffness: 170, bounceDamping: 14 }} dragElastic={0.12} whileDrag={{ rotate: -0.6, scale: 1.01 }}>
+                <About isTouch={isTouch} onContactClick={() => scrollToSection(5)} />
+              </motion.div>
+            </div>
+          </section>
+
+          <section id="skills" className="scene-panel relative">
+            <div className="container mx-auto px-4 h-full flex items-start pt-20 pb-4">
+              <motion.div className="scene-note scene-floating scene-card-shell w-full p-4 md:p-6" ref={registerFloating} drag={!isTouch} dragSnapToOrigin dragMomentum dragTransition={{ power: 0.24, timeConstant: 180, bounceStiffness: 170, bounceDamping: 14 }} dragElastic={0.1} whileDrag={{ rotate: 0.6, scale: 1.01 }}>
+                <Skills />
+              </motion.div>
+            </div>
+          </section>
+
+          <section id="projects" className="scene-panel relative">
+            <div className="container mx-auto px-4 h-full flex items-start pt-20 pb-4">
+              <motion.div className="scene-note scene-floating scene-card-shell w-full p-4 md:p-6" ref={registerFloating} drag={!isTouch} dragSnapToOrigin dragMomentum dragTransition={{ power: 0.24, timeConstant: 180, bounceStiffness: 170, bounceDamping: 14 }} dragElastic={0.1} whileDrag={{ rotate: -0.6, scale: 1.01 }}>
+                <Projects />
+              </motion.div>
+            </div>
+          </section>
+
+          <section id="experience" className="scene-panel relative">
+            <div className="container mx-auto px-4 h-full flex items-start pt-20 pb-4">
+              <motion.div className="scene-note scene-floating scene-card-shell w-full p-4 md:p-6" ref={registerFloating} drag={!isTouch} dragSnapToOrigin dragMomentum dragTransition={{ power: 0.24, timeConstant: 180, bounceStiffness: 170, bounceDamping: 14 }} dragElastic={0.1} whileDrag={{ rotate: 0.6, scale: 1.01 }}>
+                <Experience />
+              </motion.div>
+            </div>
+          </section>
+
+          <section id="contact" className="scene-panel relative">
+            <div className="container mx-auto px-4 h-full flex items-start pt-20 pb-4">
+              <motion.div className="scene-note scene-floating scene-card-shell w-full p-4 md:p-6" ref={registerFloating} drag={!isTouch} dragSnapToOrigin dragMomentum dragTransition={{ power: 0.24, timeConstant: 180, bounceStiffness: 170, bounceDamping: 14 }} dragElastic={0.1} whileDrag={{ rotate: -0.6, scale: 1.01 }}>
+                <Contact />
+              </motion.div>
+            </div>
+          </section>
             </div>
           </div>
         </main>

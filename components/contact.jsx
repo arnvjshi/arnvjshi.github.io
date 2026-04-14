@@ -1,8 +1,30 @@
 "use client"
 
-import { useRef, useState } from "react"
-import { motion, useInView } from "framer-motion"
-import { Mail, Github, Linkedin, Send, Instagram, StickyNote } from "lucide-react"
+import { useMemo, useRef, useState } from "react"
+import { motion, useInView, useMotionValue, useSpring } from "framer-motion"
+import { Mail, Send, StickyNote } from "lucide-react"
+import pretext from "pretext"
+
+// eslint-disable-next-line react/prop-types
+function PretextChip({ html }) {
+  const x = useMotionValue(0)
+  const y = useMotionValue(0)
+  const mx = useSpring(x, { stiffness: 245, damping: 15, mass: 0.28 })
+  const my = useSpring(y, { stiffness: 245, damping: 15, mass: 0.28 })
+
+  return (
+    <motion.span
+      className="pretext-chip"
+      style={{ x: mx, y: my }}
+      drag
+      dragElastic={0.1}
+      dragMomentum
+      whileHover={{ scale: 1.03, rotate: 1 }}
+      whileDrag={{ scale: 1.02, rotate: -1 }}
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
+  )
+}
 
 export default function Contact() {
   const sectionRef = useRef(null)
@@ -15,6 +37,20 @@ export default function Contact() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [focusedField, setFocusedField] = useState(null)
+
+  const contactTokens = ["*contact*", "/tap/", "_reach_", "*drag*"]
+  const renderedContactTokens = useMemo(() => {
+    const parser = typeof pretext === "function" ? pretext : pretext?.default
+    if (!parser) return contactTokens
+
+    return contactTokens.map((token) => {
+      try {
+        return parser(token).replace(/^<p>/, "").replace(/<\/p>$/, "")
+      } catch {
+        return token
+      }
+    })
+  }, [])
 
   const handleChange = (e) => {
     setFormState({
@@ -91,19 +127,19 @@ export default function Contact() {
     },
     {
       name: "GitHub",
-      icon: <Github className="w-5 h-5" />,
+      icon: <span className="text-xs font-bold">GH</span>,
       href: "https://github.com/arnvjshi",
       label: "github.com/arnvjshi",
     },
     {
       name: "LinkedIn",
-      icon: <Linkedin className="w-5 h-5" />,
+      icon: <span className="text-xs font-bold">IN</span>,
       href: "https://linkedin.com/in/arnav-joshi-aj05",
       label: "linkedin.com/in/arnav-joshi-aj05",
     },
     {
       name: "Instagram",
-      icon: <Instagram className="w-5 h-5" />,
+      icon: <span className="text-xs font-bold">IG</span>,
       href: "https://instagram.com/arnv_jshi",
       label: "instagram.com/arnv_jshi",
     },
@@ -117,23 +153,33 @@ export default function Contact() {
   ]
 
   return (
-    <section id="contact" ref={sectionRef} className="min-h-screen py-20 px-4">
+    <section id="contact" ref={sectionRef} className="w-full py-8 px-2">
       <div className="container mx-auto max-w-5xl">
         <motion.h2
           initial={{ opacity: 0, y: -20 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: -20 }}
           transition={{ duration: 0.6 }}
-          className="text-3xl md:text-4xl font-bold text-center mb-16 bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-400"
+          className="text-3xl md:text-4xl font-bold text-center mb-10 bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-400"
         >
           Get In Touch
         </motion.h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+        <motion.div className="pretext-strip justify-center mb-6" initial={{ opacity: 0, y: 10 }} animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }} transition={{ duration: 0.4 }}>
+          {renderedContactTokens.map((token) => (
+            <PretextChip key={token} html={token} />
+          ))}
+        </motion.div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <motion.div
             variants={containerVariants}
             initial="hidden"
             animate={isInView ? "visible" : "hidden"}
             className="space-y-8"
+            drag
+            dragElastic={0.1}
+            dragMomentum
+            whileDrag={{ rotate: -0.7, scale: 1.01 }}
           >
             <motion.h3 variants={itemVariants} className="text-2xl font-semibold mb-6">
               Contact Information
@@ -145,11 +191,14 @@ export default function Contact() {
             </motion.p>
 
             <motion.div variants={itemVariants} className="space-y-4">
-              {socialLinks.map((link, index) => (
+              {socialLinks.map((link) => (
                 <motion.a
-                  key={index}
+                  key={link.name}
                   href={link.href}
                   className="flex items-center gap-4 glassmorphic-card-advanced p-4 rounded-xl"
+                  drag
+                  dragElastic={0.08}
+                  dragMomentum
                   whileHover={{
                     x: 5,
                     boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
@@ -180,6 +229,10 @@ export default function Contact() {
               variants={itemVariants}
               onSubmit={handleSubmit}
               className="glassmorphic-card-advanced p-6 rounded-xl"
+              drag
+              dragElastic={0.1}
+              dragMomentum
+              whileDrag={{ rotate: 0.7, scale: 1.01 }}
             >
               <div className="space-y-6">
                 <motion.div whileHover={{ y: -2 }} animate={focusedField === "name" ? { scale: 1.02 } : { scale: 1 }}>
@@ -242,6 +295,9 @@ export default function Contact() {
                 <motion.button
                   type="submit"
                   className="neumorphic-btn-3d w-full py-3 rounded-lg font-medium flex items-center justify-center gap-2"
+                  drag
+                  dragElastic={0.08}
+                  dragMomentum
                   whileHover={{
                     scale: 1.02,
                     backgroundColor: "rgba(200, 200, 200, 0.2)",

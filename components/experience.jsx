@@ -1,12 +1,48 @@
 "use client"
 
-import { useRef } from "react"
-import { motion, useInView } from "framer-motion"
+import { useMemo, useRef } from "react"
+import { motion, useInView, useMotionValue, useSpring } from "framer-motion"
 import { Calendar, Award, Users } from "lucide-react"
+import pretext from "pretext"
+
+// eslint-disable-next-line react/prop-types
+function PretextChip({ html }) {
+  const x = useMotionValue(0)
+  const y = useMotionValue(0)
+  const mx = useSpring(x, { stiffness: 245, damping: 15, mass: 0.28 })
+  const my = useSpring(y, { stiffness: 245, damping: 15, mass: 0.28 })
+
+  return (
+    <motion.span
+      className="pretext-chip"
+      style={{ x: mx, y: my }}
+      drag
+      dragElastic={0.1}
+      dragMomentum
+      whileHover={{ scale: 1.03, rotate: 1 }}
+      whileDrag={{ scale: 1.02, rotate: -1 }}
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
+  )
+}
 
 export default function Experience() {
   const sectionRef = useRef(null)
   const isInView = useInView(sectionRef, { once: false, amount: 0.1 })
+
+  const experienceTokens = ["*experience*", "/move/", "_lead_", "*ship*"]
+  const renderedExperienceTokens = useMemo(() => {
+    const parser = typeof pretext === "function" ? pretext : pretext?.default
+    if (!parser) return experienceTokens
+
+    return experienceTokens.map((token) => {
+      try {
+        return parser(token).replace(/^<p>/, "").replace(/<\/p>$/, "")
+      } catch {
+        return token
+      }
+    })
+  }, [])
 
   const experiences = [
     {
@@ -55,28 +91,38 @@ export default function Experience() {
   }
 
   return (
-    <section id="experience" ref={sectionRef} className="min-h-screen py-20 px-4">
+    <section id="experience" ref={sectionRef} className="w-full py-8 px-2">
       <div className="container mx-auto max-w-4xl">
         <motion.h2
           initial={{ opacity: 0, y: -20 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: -20 }}
           transition={{ duration: 0.6 }}
-          className="text-3xl md:text-4xl font-bold text-center mb-16 bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-400"
+          className="text-3xl md:text-4xl font-bold text-center mb-8 text-gray-900 dark:text-gray-100"
         >
           Experience & Achievements
         </motion.h2>
+
+        <motion.div className="pretext-strip justify-center mb-6" initial={{ opacity: 0, y: 10 }} animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }} transition={{ duration: 0.4 }}>
+          {renderedExperienceTokens.map((token) => (
+            <PretextChip key={token} html={token} />
+          ))}
+        </motion.div>
 
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate={isInView ? "visible" : "hidden"}
-          className="space-y-12"
+          className="space-y-8"
         >
-          {experiences.map((exp, index) => (
+          {experiences.map((exp) => (
             <motion.div
-              key={index}
+              key={exp.title}
               variants={itemVariants}
               className="flex flex-col md:flex-row gap-6"
+              drag
+              dragElastic={0.1}
+              dragMomentum
+              whileDrag={{ rotate: -0.6, scale: 1.01 }}
               whileHover={{
                 y: -5,
                 transition: { duration: 0.2 },
@@ -88,8 +134,11 @@ export default function Experience() {
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{
                   duration: 0.5,
-                  delay: 0.2 + index * 0.1,
+                  delay: 0.2,
                 }}
+                drag
+                dragElastic={0.06}
+                dragMomentum
               >
                 <motion.div
                   className="neumorphic-icon-container-3d p-4 rounded-full w-16 h-16 flex items-center justify-center"
@@ -109,8 +158,11 @@ export default function Experience() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{
                   duration: 0.5,
-                  delay: 0.3 + index * 0.2,
+                  delay: 0.3,
                 }}
+                drag
+                dragElastic={0.08}
+                dragMomentum
                 whileHover={{
                   boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)",
                 }}
@@ -120,7 +172,10 @@ export default function Experience() {
                     className="text-xl font-bold"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ duration: 0.3, delay: 0.4 + index * 0.2 }}
+                    transition={{ duration: 0.3, delay: 0.4 }}
+                    drag
+                    dragElastic={0.08}
+                    dragMomentum
                   >
                     {exp.title}
                   </motion.h3>
@@ -128,7 +183,10 @@ export default function Experience() {
                     className="text-sm opacity-75 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-full"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 0.75 }}
-                    transition={{ duration: 0.3, delay: 0.5 + index * 0.2 }}
+                    transition={{ duration: 0.3, delay: 0.5 }}
+                    drag
+                    dragElastic={0.08}
+                    dragMomentum
                   >
                     {exp.period}
                   </motion.span>
@@ -137,14 +195,20 @@ export default function Experience() {
                   className="text-lg font-medium mb-3"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  transition={{ duration: 0.3, delay: 0.6 + index * 0.2 }}
+                  transition={{ duration: 0.3, delay: 0.6 }}
+                  drag
+                  dragElastic={0.08}
+                  dragMomentum
                 >
                   {exp.role}
                 </motion.h4>
                 <motion.p
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  transition={{ duration: 0.3, delay: 0.7 + index * 0.2 }}
+                  transition={{ duration: 0.3, delay: 0.7 }}
+                  drag
+                  dragElastic={0.08}
+                  dragMomentum
                 >
                   {exp.description}
                 </motion.p>
