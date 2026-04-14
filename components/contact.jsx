@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState } from "react"
 import { motion, useInView, useMotionValue, useSpring } from "framer-motion"
-import { Mail, Send, StickyNote } from "lucide-react"
+import { Mail, Send, StickyNote, Github, Linkedin } from "lucide-react"
 import pretext from "pretext"
 
 // eslint-disable-next-line react/prop-types
@@ -127,13 +127,13 @@ export default function Contact() {
     },
     {
       name: "GitHub",
-      icon: <span className="text-xs font-bold">GH</span>,
+      icon: <Github className="w-5 h-5" />,
       href: "https://github.com/arnvjshi",
       label: "github.com/arnvjshi",
     },
     {
       name: "LinkedIn",
-      icon: <span className="text-xs font-bold">IN</span>,
+      icon: <Linkedin className="w-5 h-5" />,
       href: "https://linkedin.com/in/arnav-joshi-aj05",
       label: "linkedin.com/in/arnav-joshi-aj05",
     },

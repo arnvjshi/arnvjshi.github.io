@@ -1,49 +1,13 @@
 "use client"
 
-import { useMemo, useRef, useState } from "react"
-import { motion, useInView, AnimatePresence, useMotionValue, useSpring } from "framer-motion"
-import { ExternalLink, ChevronLeft, ChevronRight } from "lucide-react"
-import pretext from "pretext"
-
-// eslint-disable-next-line react/prop-types
-function PretextChip({ html }) {
-  const x = useMotionValue(0)
-  const y = useMotionValue(0)
-  const mx = useSpring(x, { stiffness: 245, damping: 15, mass: 0.28 })
-  const my = useSpring(y, { stiffness: 245, damping: 15, mass: 0.28 })
-
-  return (
-    <motion.span
-      className="pretext-chip"
-      style={{ x: mx, y: my }}
-      drag
-      dragElastic={0.1}
-      dragMomentum
-      whileHover={{ scale: 1.03, rotate: -1 }}
-      whileDrag={{ scale: 1.02, rotate: 1 }}
-      dangerouslySetInnerHTML={{ __html: html }}
-    />
-  )
-}
+import { useRef, useState } from "react"
+import { motion, useInView, AnimatePresence } from "framer-motion"
+import { ExternalLink, ChevronLeft, ChevronRight, Github } from "lucide-react"
 
 export default function Projects() {
   const sectionRef = useRef(null)
   const isInView = useInView(sectionRef, { once: false, amount: 0.1 })
   const [activeProject, setActiveProject] = useState(0)
-
-  const projectTokens = ["*projects*", "/drag/", "_drop_", "*play*"]
-  const renderedProjectTokens = useMemo(() => {
-    const parser = typeof pretext === "function" ? pretext : pretext?.default
-    if (!parser) return projectTokens
-
-    return projectTokens.map((token) => {
-      try {
-        return parser(token).replace(/^<p>/, "").replace(/<\/p>$/, "")
-      } catch {
-        return token
-      }
-    })
-  }, [])
 
   const projects = [
     {
@@ -88,7 +52,7 @@ export default function Projects() {
       demo: "https://cyber-lab.vercel.app/",
     },
     {
-    title: "Other Projects",
+      title: "Other Projects",
       description:
         'You can view more of my projects on my GitHub profile.',
       technologies: ["React", "Next.js", "Node.js, etc."],
@@ -136,12 +100,6 @@ export default function Projects() {
         >
           Featured Projects
         </motion.h2>
-
-        <motion.div className="pretext-strip justify-center mb-6" initial={{ opacity: 0, y: 10 }} animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }} transition={{ duration: 0.4 }}>
-          {renderedProjectTokens.map((token) => (
-            <PretextChip key={token} html={token} />
-          ))}
-        </motion.div>
 
         {/* Mobile Project Carousel */}
         <div className="md:hidden relative">
@@ -191,9 +149,7 @@ export default function Projects() {
                     whileTap={{ scale: 0.9 }}
                     aria-label="View GitHub repository"
                   >
-                    <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-current/10 text-[10px] font-bold uppercase tracking-wider">
-                      gh
-                    </span>
+                    <Github size={20} />
                   </motion.a>
 
                   <motion.a
@@ -346,9 +302,7 @@ export default function Projects() {
                     whileTap={{ scale: 0.9 }}
                     aria-label="View GitHub repository"
                   >
-                    <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-current/10 text-[10px] font-bold uppercase tracking-wider">
-                      gh
-                    </span>
+                    <Github size={20} />
                   </motion.a>
 
                   <motion.a
@@ -368,9 +322,6 @@ export default function Projects() {
                   </motion.a>
                 </div>
               </div>
-                    drag
-                    dragElastic={0.12}
-                    dragMomentum
             </motion.div>
           ))}
         </motion.div>
