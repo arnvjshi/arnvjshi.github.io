@@ -35,23 +35,8 @@ export default function Contact() {
           stagger: 0.15,
           ease: "power3.out",
           scrollTrigger: {
-            trigger: formRef.current,
-            start: "top 80%",
-          }
-        })
-      }
-
-      if (linksRef.current) {
-        const links = linksRef.current.querySelectorAll(".social-link")
-        gsap.from(links, {
-          x: -50,
-          opacity: 0,
-          duration: 0.8,
-          stagger: 0.15,
-          ease: "back.out(1.2)",
-          scrollTrigger: {
-            trigger: linksRef.current,
-            start: "top 85%",
+            trigger: sectionRef.current,
+            start: "top 70%",
           }
         })
       }

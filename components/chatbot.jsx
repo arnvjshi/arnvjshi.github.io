@@ -55,37 +55,32 @@ export default function Chatbot() {
       const userMessage = input.toLowerCase()
       let botResponse = ""
 
-      if (userMessage.includes("hello") || userMessage.includes("hi") || userMessage.includes("hey")) {
+      if (/\b(hello|hi|hey)\b/i.test(userMessage)) {
         botResponse = "Hello! How can I assist you with Arnav's portfolio today?"
-      } else if (userMessage.includes("project") || userMessage.includes("work") || userMessage.includes("built")) {
+      } else if (/\b(project|projects|built|build)\b/i.test(userMessage)) {
         botResponse =
           "Arnav has built some impressive projects! ThreatDetect Dashboard (97.4% accuracy AI surveillance), EduBot (AI learning platform with Gemini), AI Misinformation Detection Agent (92% accuracy), and ClipMind AI (video highlight detection). Check the Projects section for details!"
-      } else if (userMessage.includes("contact") || userMessage.includes("hire") || userMessage.includes("email")) {
+      } else if (/\b(contact|hire|email|reach|message)\b/i.test(userMessage)) {
         botResponse =
           "You can reach Arnav at arnvjshi@gmail.com, connect on LinkedIn (arnav-joshi-aj05), or use the Contact form on this page!"
-      } else if (userMessage.includes("experience") || userMessage.includes("intern") || userMessage.includes("work")) {
+      } else if (/\b(experience|intern|internship|work|job)\b/i.test(userMessage)) {
         botResponse =
           "Arnav has interned at AILifeBot (Software Developer, building REST APIs), Youniformwala (Full Stack Developer, Next.js + FastAPI e-Commerce platform), EduSkills/AWS Academy (Cloud Virtual Intern), and CompEx 2025 (Tech Intern, React + Firebase). Check the Experience section!"
-      } else if (
-        userMessage.includes("skill") ||
-        userMessage.includes("technology") ||
-        userMessage.includes("tech stack") ||
-        userMessage.includes("language")
-      ) {
+      } else if (/\b(skill|skills|technology|technologies|tech|stack|language|languages)\b/i.test(userMessage)) {
         botResponse =
           "Arnav is proficient in JavaScript, TypeScript, Python, Java, C, and SQL. For frameworks: React, Next.js, Node.js, Express, Flask, FastAPI. Cloud: AWS (EC2, Lambda, S3), Azure, Docker. AI/ML: TensorFlow, PyTorch, OpenCV. Check the Skills section for the full breakdown!"
-      } else if (userMessage.includes("education") || userMessage.includes("study") || userMessage.includes("degree") || userMessage.includes("college")) {
+      } else if (/\b(education|study|degree|college|university)\b/i.test(userMessage)) {
         botResponse =
           "Arnav is pursuing B.Tech in Information Technology (Honors) at Shri Ramdeobaba College of Engineering and Management, Nagpur (2023-2027) with a 9.18 CGPA."
-      } else if (userMessage.includes("certification") || userMessage.includes("certificate") || userMessage.includes("aws")) {
+      } else if (/\b(certification|certifications|certificate|certificates|aws)\b/i.test(userMessage)) {
         botResponse =
-          "Arnav has certifications in Cloud Architecting (AWS, 60hrs), Data Engineering (AWS, 40hrs), Computer Vision (IBM), Python Programming (Google/Coursera), and Cybersecurity Architecture (IBM/Coursera). Check the Certifications section!"
-      } else if (userMessage.includes("achievement") || userMessage.includes("dsa") || userMessage.includes("leetcode") || userMessage.includes("open source")) {
+          "Arnav has 10+ certifications including Cloud Architecting (AWS), Data Engineering (AWS), Computer Vision (IBM), Python Programming (Google/Coursera), and Cybersecurity Architecture (IBM/Coursera). Check the Certifications section!"
+      } else if (/\b(achievement|achievements|dsa|leetcode|open source|hackathon)\b/i.test(userMessage)) {
         botResponse =
           "Arnav has solved 400+ DSA problems on LeetCode and other platforms, maintained a 200+ day coding streak, contributed to open-source projects at OpenSauced (Pizza CLI) and AutoMQ, and participated in national-level hackathons!"
-      } else if (userMessage.includes("thank")) {
+      } else if (/\b(thank|thanks)\b/i.test(userMessage)) {
         botResponse = "You're welcome! Feel free to ask if you have any other questions about Arnav."
-      } else if (userMessage.includes("resume") || userMessage.includes("cv")) {
+      } else if (/\b(resume|cv|download)\b/i.test(userMessage)) {
         botResponse =
           "You can download Arnav's resume from the Contact section, or directly from GitHub: github.com/arnvjshi/arnvjshi"
       } else {
