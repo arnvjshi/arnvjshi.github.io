@@ -1,34 +1,18 @@
 "use client"
 
-import { useMemo, useRef, useState } from "react"
-import { motion, useInView, useMotionValue, useSpring } from "framer-motion"
-import { Mail, Send, StickyNote, Github, Linkedin } from "lucide-react"
-import pretext from "pretext"
+import { useRef, useState, useEffect } from "react"
+import { motion, useInView, AnimatePresence } from "framer-motion"
+import { Mail, Send, StickyNote, Github, Linkedin, ArrowUpRight } from "lucide-react"
+import { gsap } from "gsap"
+import { ScrollTrigger } from "gsap/ScrollTrigger"
+import MagneticButton from "@/components/magnetic-button"
 
-// eslint-disable-next-line react/prop-types
-function PretextChip({ html }) {
-  const x = useMotionValue(0)
-  const y = useMotionValue(0)
-  const mx = useSpring(x, { stiffness: 245, damping: 15, mass: 0.28 })
-  const my = useSpring(y, { stiffness: 245, damping: 15, mass: 0.28 })
-
-  return (
-    <motion.span
-      className="pretext-chip"
-      style={{ x: mx, y: my }}
-      drag
-      dragElastic={0.1}
-      dragMomentum
-      whileHover={{ scale: 1.03, rotate: 1 }}
-      whileDrag={{ scale: 1.02, rotate: -1 }}
-      dangerouslySetInnerHTML={{ __html: html }}
-    />
-  )
-}
+gsap.registerPlugin(ScrollTrigger)
 
 export default function Contact() {
   const sectionRef = useRef(null)
-  const isInView = useInView(sectionRef, { once: false, amount: 0.1 })
+  const formRef = useRef(null)
+  const linksRef = useRef(null)
   const [formState, setFormState] = useState({
     name: "",
     email: "",
@@ -38,18 +22,42 @@ export default function Contact() {
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [focusedField, setFocusedField] = useState(null)
 
-  const contactTokens = ["*contact*", "/tap/", "_reach_", "*drag*"]
-  const renderedContactTokens = useMemo(() => {
-    const parser = typeof pretext === "function" ? pretext : pretext?.default
-    if (!parser) return contactTokens
+  useEffect(() => {
+    if (!sectionRef.current) return
 
-    return contactTokens.map((token) => {
-      try {
-        return parser(token).replace(/^<p>/, "").replace(/<\/p>$/, "")
-      } catch {
-        return token
+    const ctx = gsap.context(() => {
+      if (formRef.current) {
+        const fields = formRef.current.querySelectorAll(".form-field, .submit-btn-wrapper")
+        gsap.from(fields, {
+          y: 40,
+          opacity: 0,
+          duration: 0.8,
+          stagger: 0.15,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: formRef.current,
+            start: "top 80%",
+          }
+        })
       }
-    })
+
+      if (linksRef.current) {
+        const links = linksRef.current.querySelectorAll(".social-link")
+        gsap.from(links, {
+          x: -50,
+          opacity: 0,
+          duration: 0.8,
+          stagger: 0.15,
+          ease: "back.out(1.2)",
+          scrollTrigger: {
+            trigger: linksRef.current,
+            start: "top 85%",
+          }
+        })
+      }
+    }, sectionRef)
+
+    return () => ctx.revert()
   }, [])
 
   const handleChange = (e) => {
@@ -59,13 +67,8 @@ export default function Contact() {
     })
   }
 
-  const handleFocus = (field) => {
-    setFocusedField(field)
-  }
-
-  const handleBlur = () => {
-    setFocusedField(null)
-  }
+  const handleFocus = (field) => setFocusedField(field)
+  const handleBlur = () => setFocusedField(null)
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -75,10 +78,9 @@ export default function Contact() {
       "https://docs.google.com/forms/d/e/1FAIpQLSf-Ftv4Mt3YX9puPlulHwhIgo-w8dqf69dDbR5NDP6wDkv5Hg/formResponse";
   
     const formData = new FormData();
-    formData.append("entry.578838710", formState.name); // Name
-    formData.append("entry.811746656", formState.email); // Email
-    formData.append("entry.1900870639", formState.message); // Message
-    console.log(formState.name, formState.email, formState.message);
+    formData.append("entry.578838710", formState.name);
+    formData.append("entry.811746656", formState.email);
+    formData.append("entry.1900870639", formState.message);
   
     fetch(formUrl, {
       method: "POST",
@@ -89,7 +91,6 @@ export default function Contact() {
         setIsSubmitting(false);
         setIsSubmitted(true);
         setFormState({ name: "", email: "", message: "" });
-  
         setTimeout(() => setIsSubmitted(false), 5000);
       })
       .catch((error) => {
@@ -97,33 +98,13 @@ export default function Contact() {
         setIsSubmitting(false);
       });
   };
-  
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.2,
-      },
-    },
-  }
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.5 },
-    },
-  }
 
   const socialLinks = [
     {
       name: "Email",
       icon: <Mail className="w-5 h-5" />,
-      href: "mailto:arnavjoshi0512@gmail.com",
-      label: "arnavjoshi0512@gmail.com",
+      href: "mailto:arnvjshi@gmail.com",
+      label: "arnvjshi@gmail.com",
     },
     {
       name: "GitHub",
@@ -135,224 +116,204 @@ export default function Contact() {
       name: "LinkedIn",
       icon: <Linkedin className="w-5 h-5" />,
       href: "https://linkedin.com/in/arnav-joshi-aj05",
-      label: "linkedin.com/in/arnav-joshi-aj05",
-    },
-    {
-      name: "Instagram",
-      icon: <span className="text-xs font-bold">IG</span>,
-      href: "https://instagram.com/arnv_jshi",
-      label: "instagram.com/arnv_jshi",
+      label: "arnav-joshi-aj05",
     },
     {
       name: "Resume",
       icon: <StickyNote className="w-5 h-5" />,
       href: "https://raw.githubusercontent.com/arnvjshi/arnvjshi/main/Resume.pdf",
       label: "Download Resume",
-    }
-    
+    },
   ]
 
   return (
-    <section id="contact" ref={sectionRef} className="w-full py-8 px-2">
+    <div ref={sectionRef} className="w-full py-8 px-4">
       <div className="container mx-auto max-w-5xl">
-        <motion.h2
-          initial={{ opacity: 0, y: -20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: -20 }}
-          transition={{ duration: 0.6 }}
-          className="text-3xl md:text-4xl font-bold text-center mb-10 bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-400"
-        >
-          Get In Touch
-        </motion.h2>
-
-        <motion.div className="pretext-strip justify-center mb-6" initial={{ opacity: 0, y: 10 }} animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }} transition={{ duration: 0.4 }}>
-          {renderedContactTokens.map((token) => (
-            <PretextChip key={token} html={token} />
-          ))}
-        </motion.div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate={isInView ? "visible" : "hidden"}
-            className="space-y-8"
-            drag
-            dragElastic={0.1}
-            dragMomentum
-            whileDrag={{ rotate: -0.7, scale: 1.01 }}
+        <div className="text-center mb-16">
+          <motion.p
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 0.4 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-xs tracking-[0.3em] uppercase text-emerald-400/60 mb-3"
           >
-            <motion.h3 variants={itemVariants} className="text-2xl font-semibold mb-6">
-              Contact Information
-            </motion.h3>
+            Connect
+          </motion.p>
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="text-4xl md:text-5xl font-bold mb-4"
+            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+          >
+            Get In Touch
+          </motion.h2>
+          <div className="w-12 h-[2px] bg-gradient-to-r from-emerald-500 to-cyan-500 mx-auto" />
+        </div>
 
-            <motion.p variants={itemVariants} className="mb-8">
-              Feel free to reach out for collaborations, opportunities, or just to say hello! I'll get back to you as
-              soon as possible.
-            </motion.p>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16">
+          {/* Social Links */}
+          <div ref={linksRef} className="lg:col-span-5 space-y-8">
+            <div>
+              <h3
+                className="text-2xl font-bold mb-4 tracking-tight"
+                style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+              >
+                Let's build something <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-cyan-400">extraordinary.</span>
+              </h3>
 
-            <motion.div variants={itemVariants} className="space-y-4">
+              <p className="text-base text-white/50 mb-8 leading-relaxed font-light">
+                Whether you have a project in mind, a role to fill, or just want to chat about tech—I'm always open to discussing new opportunities.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
               {socialLinks.map((link) => (
-                <motion.a
+                <a
                   key={link.name}
                   href={link.href}
-                  className="flex items-center gap-4 glassmorphic-card-advanced p-4 rounded-xl"
-                  drag
-                  dragElastic={0.08}
-                  dragMomentum
-                  whileHover={{
-                    x: 5,
-                    boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
-                    backgroundColor: "rgba(200, 200, 200, 0.1)",
-                  }}
-                  whileTap={{ scale: 0.98 }}
+                  className="social-link group relative flex items-center justify-between glassmorphic-card-advanced p-5 rounded-2xl overflow-hidden"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <motion.div
-                    className="neumorphic-icon-container-3d p-2 rounded-full"
-                    whileHover={{ rotate: 360 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    {link.icon}
-                  </motion.div>
-                  <div>
-                    <h4 className="font-medium">{link.name}</h4>
-                    <p className="text-sm opacity-75">{link.label}</p>
+                  <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  
+                  <div className="flex items-center gap-4 relative z-10">
+                    <div className="neumorphic-icon-container-3d p-3 rounded-xl text-emerald-400 group-hover:scale-110 group-hover:bg-emerald-500/20 transition-all duration-300">
+                      {link.icon}
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-sm tracking-wide">{link.name}</h4>
+                      <p className="text-xs text-white/40 mt-0.5">{link.label}</p>
+                    </div>
                   </div>
-                </motion.a>
+                  
+                  <ArrowUpRight className="w-5 h-5 text-white/20 group-hover:text-emerald-400 group-hover:translate-x-1 group-hover:-translate-y-1 transition-all duration-300 relative z-10" />
+                </a>
               ))}
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
 
-          <motion.div variants={containerVariants} initial="hidden" animate={isInView ? "visible" : "hidden"}>
-            <motion.form
-              variants={itemVariants}
-              onSubmit={handleSubmit}
-              className="glassmorphic-card-advanced p-6 rounded-xl"
-              drag
-              dragElastic={0.1}
-              dragMomentum
-              whileDrag={{ rotate: 0.7, scale: 1.01 }}
-            >
-              <div className="space-y-6">
-                <motion.div whileHover={{ y: -2 }} animate={focusedField === "name" ? { scale: 1.02 } : { scale: 1 }}>
-                  <label htmlFor="name" className="block text-sm font-medium mb-2">
-                    Name
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={formState.name}
-                    onChange={handleChange}
-                    onFocus={() => handleFocus("name")}
-                    onBlur={handleBlur}
-                    required
-                    className="neumorphic-input-3d w-full px-4 py-3 rounded-lg transition-all duration-300"
-                    placeholder="Your name"
-                  />
-                </motion.div>
+          {/* Contact Form */}
+          <div className="lg:col-span-7">
+            <div className="relative group/form">
+              <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/20 via-cyan-500/20 to-emerald-500/20 rounded-[2rem] blur-xl opacity-30 group-hover/form:opacity-60 transition duration-1000" />
+              
+              <form ref={formRef} onSubmit={handleSubmit} className="relative glassmorphic-card-advanced p-8 md:p-10 rounded-[2rem] overflow-hidden">
+                {/* Decorative blur elements */}
+                <div className="absolute -top-32 -right-32 w-64 h-64 bg-cyan-500/10 rounded-full blur-[60px] pointer-events-none" />
+                <div className="absolute -bottom-32 -left-32 w-64 h-64 bg-emerald-500/10 rounded-full blur-[60px] pointer-events-none" />
 
-                <motion.div whileHover={{ y: -2 }} animate={focusedField === "email" ? { scale: 1.02 } : { scale: 1 }}>
-                  <label htmlFor="email" className="block text-sm font-medium mb-2">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={formState.email}
-                    onChange={handleChange}
-                    onFocus={() => handleFocus("email")}
-                    onBlur={handleBlur}
-                    required
-                    className="neumorphic-input-3d w-full px-4 py-3 rounded-lg transition-all duration-300"
-                    placeholder="your.email@example.com"
-                  />
-                </motion.div>
+                <div className="space-y-6 relative z-10">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="form-field relative">
+                      <label htmlFor="name" className={`absolute left-4 transition-all duration-300 pointer-events-none ${focusedField === 'name' || formState.name ? '-top-2.5 text-[10px] px-1 bg-[#0a0a0a] text-emerald-400 font-medium tracking-wider uppercase' : 'top-4 text-sm text-white/30'}`}>
+                        Name
+                      </label>
+                      <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        value={formState.name}
+                        onChange={handleChange}
+                        onFocus={() => handleFocus("name")}
+                        onBlur={handleBlur}
+                        required
+                        className="w-full bg-white/[0.02] border border-white/10 focus:border-emerald-500/50 rounded-xl px-4 py-4 text-white outline-none transition-all duration-300 hover:bg-white/[0.04]"
+                      />
+                    </div>
 
-                <motion.div
-                  whileHover={{ y: -2 }}
-                  animate={focusedField === "message" ? { scale: 1.02 } : { scale: 1 }}
-                >
-                  <label htmlFor="message" className="block text-sm font-medium mb-2">
-                    Message
-                  </label>
-                  <textarea
-                    id="message"
-                    name="message"
-                    value={formState.message}
-                    onChange={handleChange}
-                    onFocus={() => handleFocus("message")}
-                    onBlur={handleBlur}
-                    required
-                    rows={5}
-                    className="neumorphic-input-3d w-full px-4 py-3 rounded-lg transition-all duration-300"
-                    placeholder="Your message..."
-                  />
-                </motion.div>
+                    <div className="form-field relative">
+                      <label htmlFor="email" className={`absolute left-4 transition-all duration-300 pointer-events-none ${focusedField === 'email' || formState.email ? '-top-2.5 text-[10px] px-1 bg-[#0a0a0a] text-emerald-400 font-medium tracking-wider uppercase' : 'top-4 text-sm text-white/30'}`}>
+                        Email
+                      </label>
+                      <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        value={formState.email}
+                        onChange={handleChange}
+                        onFocus={() => handleFocus("email")}
+                        onBlur={handleBlur}
+                        required
+                        className="w-full bg-white/[0.02] border border-white/10 focus:border-emerald-500/50 rounded-xl px-4 py-4 text-white outline-none transition-all duration-300 hover:bg-white/[0.04]"
+                      />
+                    </div>
+                  </div>
 
-                <motion.button
-                  type="submit"
-                  className="neumorphic-btn-3d w-full py-3 rounded-lg font-medium flex items-center justify-center gap-2"
-                  drag
-                  dragElastic={0.08}
-                  dragMomentum
-                  whileHover={{
-                    scale: 1.02,
-                    backgroundColor: "rgba(200, 200, 200, 0.2)",
-                  }}
-                  whileTap={{ scale: 0.98 }}
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ repeat: Number.POSITIVE_INFINITY, duration: 1, ease: "linear" }}
+                  <div className="form-field relative">
+                    <label htmlFor="message" className={`absolute left-4 transition-all duration-300 pointer-events-none ${focusedField === 'message' || formState.message ? '-top-2.5 text-[10px] px-1 bg-[#0a0a0a] text-emerald-400 font-medium tracking-wider uppercase' : 'top-4 text-sm text-white/30'}`}>
+                      Message
+                    </label>
+                    <textarea
+                      id="message"
+                      name="message"
+                      value={formState.message}
+                      onChange={handleChange}
+                      onFocus={() => handleFocus("message")}
+                      onBlur={handleBlur}
+                      required
+                      rows={5}
+                      className="w-full bg-white/[0.02] border border-white/10 focus:border-emerald-500/50 rounded-xl px-4 py-4 text-white outline-none transition-all duration-300 hover:bg-white/[0.04] resize-none"
+                    />
+                  </div>
+
+                  <div className="submit-btn-wrapper pt-4">
+                    <MagneticButton 
+                      strength={0.2} 
+                      as="div"
+                      className="w-full"
                     >
-                      <svg
-                        className="animate-spin h-5 w-5"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
+                      <button
+                        type="submit" 
+                        disabled={isSubmitting} 
+                        className="w-full py-4 rounded-xl font-bold flex items-center justify-center gap-3 text-sm uppercase tracking-[0.2em] relative overflow-hidden group"
                       >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        ></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                      </svg>
-                    </motion.div>
-                  ) : (
-                    <>
-                      Send Message <Send className="w-4 h-4" />
-                    </>
-                  )}
-                </motion.button>
+                        {/* Button Background */}
+                        <div className="absolute inset-0 bg-white transition-transform duration-300 group-hover:scale-[1.02]" />
+                        
+                        {/* Hover Gradient Overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        
+                        {/* Button Content */}
+                        <div className="relative z-10 flex items-center justify-center gap-3 w-full">
+                          {isSubmitting ? (
+                            <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }}>
+                              <svg className="h-5 w-5 text-black group-hover:text-white transition-colors duration-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                              </svg>
+                            </motion.div>
+                          ) : (
+                            <>
+                              <span className="text-black group-hover:text-white transition-colors duration-300">Send Message</span>
+                              <Send className="w-4 h-4 text-black group-hover:text-white group-hover:translate-x-1 group-hover:-translate-y-1 transition-all duration-300" />
+                            </>
+                          )}
+                        </div>
+                      </button>
+                    </MagneticButton>
+                  </div>
 
-                {isSubmitted && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-center text-green-500 dark:text-green-400 mt-4 pulse-animation"
-                  >
-                    Message sent successfully!
-                  </motion.div>
-                )}
-              </div>
-            </motion.form>
-          </motion.div>
+                  <AnimatePresence>
+                    {isSubmitted && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10, height: 0 }}
+                        animate={{ opacity: 1, y: 0, height: "auto" }}
+                        exit={{ opacity: 0, y: -10, height: 0 }}
+                        className="text-center text-emerald-400 text-sm font-medium tracking-wide bg-emerald-500/10 py-3 rounded-lg border border-emerald-500/20"
+                      >
+                        ✓ Message sent successfully! I'll get back to you soon.
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </form>
+            </div>
+          </div>
         </div>
       </div>
-    </section>
+    </div>
   )
 }
-

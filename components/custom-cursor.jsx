@@ -1,96 +1,131 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { motion } from "framer-motion"
+import { useEffect, useRef } from "react"
+import { gsap } from "gsap"
 
 export default function CustomCursor() {
-  const [position, setPosition] = useState({ x: 0, y: 0 })
-  const [clicked, setClicked] = useState(false)
-  const [linkHovered, setLinkHovered] = useState(false)
-  const [hidden, setHidden] = useState(true)
+  const cursorRef = useRef(null)
+  const dotRef = useRef(null)
+  const posRef = useRef({ x: 0, y: 0 })
+  const isVisible = useRef(false)
+  const isHovering = useRef(false)
+  const isClicked = useRef(false)
 
   useEffect(() => {
-    const addEventListeners = () => {
-      document.addEventListener("mousemove", onMouseMove)
-      document.addEventListener("mouseenter", onMouseEnter)
-      document.addEventListener("mouseleave", onMouseLeave)
-      document.addEventListener("mousedown", onMouseDown)
-      document.addEventListener("mouseup", onMouseUp)
+    if (typeof window === "undefined") return
+    
+    // Don't show custom cursor on touch devices
+    const isTouchDevice = window.matchMedia("(pointer: coarse)").matches
+    if (isTouchDevice) return
+
+    const cursor = cursorRef.current
+    const dot = dotRef.current
+    if (!cursor || !dot) return
+
+    const onMouseMove = (e) => {
+      posRef.current = { x: e.clientX, y: e.clientY }
+      
+      if (!isVisible.current) {
+        isVisible.current = true
+        gsap.set([cursor, dot], { opacity: 1 })
+      }
+
+      gsap.to(dot, {
+        x: e.clientX - 4,
+        y: e.clientY - 4,
+        duration: 0.1,
+        ease: "power2.out",
+      })
+
+      gsap.to(cursor, {
+        x: e.clientX - 20,
+        y: e.clientY - 20,
+        duration: 0.35,
+        ease: "power2.out",
+      })
     }
 
-    const removeEventListeners = () => {
+    const onMouseLeave = () => {
+      isVisible.current = false
+      gsap.to([cursor, dot], { opacity: 0, duration: 0.2 })
+    }
+
+    const onMouseEnter = () => {
+      isVisible.current = true
+      gsap.to([cursor, dot], { opacity: 1, duration: 0.2 })
+    }
+
+    const onMouseDown = () => {
+      isClicked.current = true
+      gsap.to(cursor, { scale: 0.8, duration: 0.15 })
+      gsap.to(dot, { scale: 1.5, duration: 0.15 })
+    }
+
+    const onMouseUp = () => {
+      isClicked.current = false
+      gsap.to(cursor, { scale: isHovering.current ? 1.5 : 1, duration: 0.15 })
+      gsap.to(dot, { scale: 1, duration: 0.15 })
+    }
+
+    // Attach hover listeners using delegation (handles dynamic elements)
+    const onHoverStart = (e) => {
+      const target = e.target.closest('a, button, [role="button"], input, textarea, select, label[for]')
+      if (target) {
+        isHovering.current = true
+        gsap.to(cursor, { scale: 1.5, borderColor: "rgba(16, 185, 129, 0.5)", duration: 0.3 })
+        gsap.to(dot, { scale: 0.5, backgroundColor: "#10b981", duration: 0.3 })
+      }
+    }
+
+    const onHoverEnd = (e) => {
+      const target = e.target.closest('a, button, [role="button"], input, textarea, select, label[for]')
+      if (target) {
+        isHovering.current = false
+        gsap.to(cursor, { scale: 1, borderColor: "rgba(255, 255, 255, 0.5)", duration: 0.3 })
+        gsap.to(dot, { scale: 1, backgroundColor: "#ffffff", duration: 0.3 })
+      }
+    }
+
+    document.addEventListener("mousemove", onMouseMove, { passive: true })
+    document.addEventListener("mouseenter", onMouseEnter)
+    document.addEventListener("mouseleave", onMouseLeave)
+    document.addEventListener("mousedown", onMouseDown)
+    document.addEventListener("mouseup", onMouseUp)
+    document.addEventListener("mouseover", onHoverStart, { passive: true })
+    document.addEventListener("mouseout", onHoverEnd, { passive: true })
+
+    return () => {
       document.removeEventListener("mousemove", onMouseMove)
       document.removeEventListener("mouseenter", onMouseEnter)
       document.removeEventListener("mouseleave", onMouseLeave)
       document.removeEventListener("mousedown", onMouseDown)
       document.removeEventListener("mouseup", onMouseUp)
-    }
-
-    const onMouseMove = (e) => {
-      setPosition({ x: e.clientX, y: e.clientY })
-    }
-
-    const onMouseEnter = () => {
-      setHidden(false)
-    }
-
-    const onMouseLeave = () => {
-      setHidden(true)
-    }
-
-    const onMouseDown = () => {
-      setClicked(true)
-    }
-
-    const onMouseUp = () => {
-      setClicked(false)
-    }
-
-    const handleLinkHoverEvents = () => {
-      document.querySelectorAll('a, button, [role="button"]').forEach((el) => {
-        el.addEventListener("mouseenter", () => setLinkHovered(true))
-        el.addEventListener("mouseleave", () => setLinkHovered(false))
-      })
-    }
-
-    addEventListeners()
-    handleLinkHoverEvents()
-
-    return () => {
-      removeEventListeners()
+      document.removeEventListener("mouseover", onHoverStart)
+      document.removeEventListener("mouseout", onHoverEnd)
     }
   }, [])
 
   return (
     <>
-      <motion.div
-        className={`fixed top-0 left-0 w-8 h-8 rounded-full border-2 border-primary z-[9999] pointer-events-none ${hidden ? "opacity-0" : "opacity-100"}`}
-        animate={{
-          x: position.x - 16,
-          y: position.y - 16,
-          scale: clicked ? 0.8 : linkHovered ? 1.5 : 1,
-        }}
-        transition={{
-          type: "spring",
-          stiffness: 500,
-          damping: 28,
-          mass: 0.5,
+      {/* Outer ring */}
+      <div
+        ref={cursorRef}
+        className="fixed top-0 left-0 w-10 h-10 rounded-full pointer-events-none z-[9999] opacity-0"
+        style={{
+          border: "1.5px solid rgba(255, 255, 255, 0.5)",
+          mixBlendMode: "difference",
+          willChange: "transform",
         }}
       />
-      <motion.div
-        className={`fixed top-0 left-0 w-2 h-2 bg-primary rounded-full z-[9999] pointer-events-none ${hidden ? "opacity-0" : "opacity-100"}`}
-        animate={{
-          x: position.x - 4,
-          y: position.y - 4,
-          scale: clicked ? 1.5 : 1,
-        }}
-        transition={{
-          type: "spring",
-          stiffness: 1500,
-          damping: 30,
+      {/* Inner dot */}
+      <div
+        ref={dotRef}
+        className="fixed top-0 left-0 w-2 h-2 rounded-full pointer-events-none z-[9999] opacity-0"
+        style={{
+          backgroundColor: "#ffffff",
+          willChange: "transform",
         }}
       />
     </>
   )
 }
-

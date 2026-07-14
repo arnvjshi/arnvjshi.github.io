@@ -1,7 +1,8 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
-import { motion, useScroll, useTransform } from "framer-motion"
+import { useEffect, useState, useRef } from "react"
+import dynamic from "next/dynamic"
+import { motion, useScroll, useSpring } from "framer-motion"
 import { gsap } from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import CustomCursor from "@/components/custom-cursor"
@@ -10,33 +11,34 @@ import About from "@/components/about"
 import Skills from "@/components/skills"
 import Projects from "@/components/projects"
 import Experience from "@/components/experience"
+import Certifications from "@/components/certifications"
 import Contact from "@/components/contact"
 import LoadingScreen from "@/components/loading-screen"
-import { ThemeProvider } from "@/components/theme-provider"
-import VantaBackground from "@/components/vanta-background"
 import TypewriterEffect from "@/components/typewriter-effect"
 import Chatbot from "@/components/chatbot"
-import BrushStrokes from "@/components/brush-strokes"
-import ProfileSection from "@/components/profile-section"
+import MarqueeText from "@/components/marquee-text"
+import MagneticButton from "@/components/magnetic-button"
+
+// Dynamic import Three.js hero (SSR-unsafe)
+const ThreeHero = dynamic(() => import("@/components/three-hero"), {
+  ssr: false,
+  loading: () => <div className="absolute inset-0 bg-[#0a0a0a]" />,
+})
 
 gsap.registerPlugin(ScrollTrigger)
 
 export default function Home() {
   const [loading, setLoading] = useState(true)
   const [activeSection, setActiveSection] = useState("home")
-  const [sceneProgress, setSceneProgress] = useState(0)
-  const [isTouch, setIsTouch] = useState(false)
-  const [teleportPulse, setTeleportPulse] = useState(0)
+  const [scrolled, setScrolled] = useState(false)
   const { scrollYProgress } = useScroll()
   const mainRef = useRef(null)
-  const sectionTrackRef = useRef(null)
-  const sectionShellRef = useRef(null)
-  const sectionScrollStartRef = useRef(0)
-  const sectionScrollStepRef = useRef(0)
-  const scrollRafRef = useRef(null)
 
-  const y = useTransform(scrollYProgress, [0, 0.5], [0, -150])
-  const opacity = useTransform(scrollYProgress, [0, 0.2], [1, 0])
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  })
 
   const sceneSections = [
     { id: "home", label: "Home" },
@@ -44,333 +46,379 @@ export default function Home() {
     { id: "skills", label: "Skills" },
     { id: "projects", label: "Projects" },
     { id: "experience", label: "Experience" },
+    { id: "certifications", label: "Certifications" },
     { id: "contact", label: "Contact" },
   ]
 
-  const clampIndex = (index) => Math.min(sceneSections.length - 1, Math.max(0, index))
-
-  const smoothScrollTo = (targetY, duration = 620) => {
-    if (globalThis.window === undefined) return
-
-    if (scrollRafRef.current) {
-      globalThis.cancelAnimationFrame(scrollRafRef.current)
+  const scrollToSection = (index) => {
+    const section = document.getElementById(sceneSections[index].id)
+    if (section) {
+      window.scrollTo({
+        top: section.offsetTop,
+        behavior: "smooth"
+      })
+      setActiveSection(sceneSections[index].id)
     }
-
-    const startY = globalThis.scrollY
-    const delta = targetY - startY
-    const startTime = performance.now()
-
-    const step = (now) => {
-      const elapsed = now - startTime
-      const progress = Math.min(1, elapsed / duration)
-      const eased = progress < 0.5 ? 4 * progress * progress * progress : 1 - Math.pow(-2 * progress + 2, 3) / 2
-
-      globalThis.scrollTo(0, startY + delta * eased)
-
-      if (progress < 1) {
-        scrollRafRef.current = globalThis.requestAnimationFrame(step)
-      }
-    }
-
-    scrollRafRef.current = globalThis.requestAnimationFrame(step)
-  }
-
-  const scrollToSection = (targetIndex) => {
-    const sectionIndex = clampIndex(targetIndex)
-    const targetSectionId = sceneSections[sectionIndex].id
-    const targetSection = document.getElementById(targetSectionId)
-    const targetScroll =
-      sectionScrollStepRef.current > 0
-        ? sectionScrollStartRef.current + sectionIndex * sectionScrollStepRef.current
-        : targetSection?.offsetTop || sectionShellRef.current?.offsetTop || 0
-
-    setTeleportPulse((prev) => prev + 1)
-    globalThis.setTimeout(() => {
-      smoothScrollTo(targetScroll, isTouch ? 470 : 650)
-    }, 90)
-
-    setActiveSection(targetSectionId)
   }
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false)
-    }, 2500)
-
+    const timer = setTimeout(() => setLoading(false), 2800)
     return () => clearTimeout(timer)
   }, [])
 
+  // GSAP cinematic animations
   useEffect(() => {
-    if (globalThis.window === undefined) return
-
-    const media = globalThis.matchMedia("(pointer: coarse), (max-width: 900px)")
-    const updateTouchMode = () => setIsTouch(media.matches)
-    updateTouchMode()
-    media.addEventListener("change", updateTouchMode)
-
-    return () => media.removeEventListener("change", updateTouchMode)
-  }, [])
-
-  useEffect(() => {
-    if (loading || !sectionShellRef.current || !sectionTrackRef.current) {
-      return
-    }
+    if (loading || !mainRef.current) return
 
     const ctx = gsap.context(() => {
-      const panels = gsap.utils.toArray(".scene-panel")
-      const totalWidth = Math.max(0, sectionTrackRef.current.scrollWidth - globalThis.innerWidth)
-      const sectionCount = Math.max(1, panels.length - 1)
-      sectionScrollStartRef.current = sectionShellRef.current.getBoundingClientRect().top + globalThis.scrollY
-      sectionScrollStepRef.current = sectionCount > 0 ? totalWidth / sectionCount : totalWidth
-
-      const horizontalTween = gsap.to(sectionTrackRef.current, {
-        x: () => -totalWidth,
+      // Hero parallax depth
+      gsap.to(".hero-parallax", {
+        yPercent: 40,
         ease: "none",
         scrollTrigger: {
-          trigger: sectionShellRef.current,
+          trigger: "#home",
           start: "top top",
-          end: () => `+=${totalWidth}`,
-          scrub: 1.1,
-          pin: true,
-          anticipatePin: 2,
-          fastScrollEnd: true,
-          invalidateOnRefresh: true,
-          snap: {
-            snapTo: (value) => Math.round(value * sectionCount) / sectionCount,
-            duration: { min: 0.2, max: 0.75 },
-            delay: 0.03,
-            ease: "power2.inOut",
-            directional: true,
-          },
-          onUpdate: (self) => {
-            setSceneProgress(self.progress)
-            const activeIndex = clampIndex(Math.round(self.progress * sectionCount))
-            setActiveSection(sceneSections[activeIndex].id)
-          },
-        },
-      })
-
-      panels.forEach((panel, index) => {
-        const signatures = [
-          { from: { y: 22, rotate: -0.6, x: 0 }, to: { y: 0, rotate: 0, x: 0 } },
-          { from: { y: 10, rotate: 0.4, x: 24 }, to: { y: 0, rotate: 0, x: 0 } },
-          { from: { y: 24, rotate: -0.2, x: -20 }, to: { y: 0, rotate: 0, x: 0 } },
-          { from: { y: 14, rotate: 0.7, x: 14 }, to: { y: 0, rotate: 0, x: 0 } },
-          { from: { y: 26, rotate: -0.8, x: -12 }, to: { y: 0, rotate: 0, x: 0 } },
-          { from: { y: 18, rotate: 0.25, x: 18 }, to: { y: 0, rotate: 0, x: 0 } },
-        ]
-        const signature = signatures[index % signatures.length]
-
-        gsap.fromTo(
-          panel,
-          { opacity: 0.4, scale: 0.96 },
-          {
-            opacity: 1,
-            scale: 1,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: panel,
-              containerAnimation: horizontalTween,
-              start: `left ${84 - Math.min(index * 4, 20)}%`,
-              end: "right 20%",
-              toggleActions: "play none none reverse",
-            },
-          },
-        )
-
-        const panelCard = panel.querySelector(".scene-card-shell")
-        if (panelCard) {
-          gsap.fromTo(
-            panelCard,
-            { ...signature.from, opacity: 0.75, filter: "blur(2px)" },
-            {
-              ...signature.to,
-              opacity: 1,
-              filter: "blur(0px)",
-              ease: "power2.out",
-              scrollTrigger: {
-                trigger: panel,
-                containerAnimation: horizontalTween,
-                start: `left ${88 - Math.min(index * 3, 18)}%`,
-                end: "left 50%",
-                scrub: 0.7,
-              },
-            },
-          )
+          end: "bottom top",
+          scrub: true,
         }
       })
-    }, sectionShellRef)
 
-    ScrollTrigger.refresh()
+      // Hero content fade + scale on scroll
+      gsap.to(".hero-content", {
+        opacity: 0,
+        scale: 0.95,
+        y: -80,
+        ease: "none",
+        scrollTrigger: {
+          trigger: "#home",
+          start: "30% top",
+          end: "bottom top",
+          scrub: true,
+        }
+      })
+
+      // Reveal each section with a clip-path wipe
+      const sections = mainRef.current.querySelectorAll(".reveal-section")
+      sections.forEach((section) => {
+        gsap.from(section, {
+          clipPath: "inset(10% 0% 10% 0%)",
+          opacity: 0.3,
+          duration: 1.2,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: section,
+            start: "top 85%",
+            end: "top 40%",
+            scrub: 1,
+          }
+        })
+      })
+
+      // Floating ambient orbs parallax
+      const orbs = document.querySelectorAll(".ambient-orb")
+      orbs.forEach((orb, i) => {
+        gsap.to(orb, {
+          y: (i % 2 === 0 ? -120 : 120),
+          ease: "none",
+          scrollTrigger: {
+            trigger: orb.parentElement,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: true,
+          }
+        })
+      })
+    }, mainRef)
 
     return () => ctx.revert()
   }, [loading])
 
-  const registerFloating = () => undefined
+  useEffect(() => {
+    if (typeof window === "undefined") return
+
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50)
+
+      const sections = sceneSections.map(s => document.getElementById(s.id))
+      const scrollPosition = window.scrollY + window.innerHeight / 3
+
+      for (let i = sections.length - 1; i >= 0; i--) {
+        const section = sections[i]
+        if (section && section.offsetTop <= scrollPosition) {
+          if (activeSection !== sceneSections[i].id) {
+            setActiveSection(sceneSections[i].id)
+          }
+          break
+        }
+      }
+    }
+
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [activeSection])
 
   if (loading) {
     return <LoadingScreen />
   }
 
   return (
-    <ThemeProvider defaultTheme="dark" attribute="class">
-      <title>Arnav Joshi</title>
-      <meta name="viewport" content="width=device-width, initial-scale=1"></meta>
-      <div className="scene-shell relative min-h-screen bg-gradient-to-b from-white to-gray-100 dark:from-black dark:to-gray-900 text-black dark:text-white overflow-hidden">
-        <motion.div
-          key={teleportPulse}
-          className="scene-teleport-overlay"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: [0, 0.22, 0], scale: [1, 1.02, 1] }}
-          transition={{ duration: 0.5, ease: "easeInOut" }}
-        />
-        <CustomCursor />
-        <Navbar activeSection={activeSection} onNavigate={scrollToSection} scrolled={sceneProgress > 0.02} />
+    <div className="relative min-h-screen bg-[#0a0a0a] text-white noise-overlay">
+      <CustomCursor />
+      
+      <Navbar 
+        activeSection={activeSection} 
+        onNavigate={scrollToSection} 
+        scrolled={scrolled} 
+      />
 
-        {/* Progress bar */}
-        <motion.div
-          className="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-gray-500 via-gray-300 to-gray-500 dark:from-gray-700 dark:via-gray-300 dark:to-gray-700 z-50"
-          style={{ scaleX: scrollYProgress, transformOrigin: "0%" }}
-        />
+      {/* Progress bar */}
+      <motion.div
+        className="fixed top-0 left-0 right-0 h-[2px] z-50"
+        style={{
+          scaleX,
+          transformOrigin: "0%",
+          background: "linear-gradient(90deg, #10b981, #34d399, #06b6d4)",
+        }}
+      />
 
-        <main ref={mainRef} className="relative z-10">
-          <div ref={sectionShellRef} className="scene-pin">
-            <div ref={sectionTrackRef} className="scene-track">
-          <section id="home" className="scene-panel relative">
-            <VantaBackground>
-              <div className="flex items-center justify-center min-h-screen px-4 relative z-10">
-                <motion.div
-                  className="scene-note scene-floating scene-card-shell text-center w-full max-w-5xl mx-auto bg-black/10 dark:bg-white/5 backdrop-blur-sm p-8 rounded-xl"
-                  style={{ y, opacity }}
-                  ref={registerFloating}
-                  drag={!isTouch}
-                  dragElastic={0.08}
-                  dragSnapToOrigin
-                  dragMomentum
-                  dragTransition={{ power: 0.22, timeConstant: 180, bounceStiffness: 170, bounceDamping: 14 }}
-                  whileHover={{ scale: 1.01, rotate: -0.4 }}
-                  whileTap={{ scale: 0.99 }}
-                  whileDrag={{ rotate: 1.2, scale: 1.01 }}
-                >
-                  <ProfileSection isTouch={isTouch} />
+      <main ref={mainRef} className="relative z-10 w-full overflow-x-hidden">
+        
+        {/* ═══════════════════════════════════════
+            HERO SECTION
+            ═══════════════════════════════════════ */}
+        <section id="home" className="relative min-h-[100dvh] flex items-center justify-center pt-32 pb-10">
+          {/* 3D Background */}
+          <div className="absolute inset-0 z-0 hero-parallax">
+            <ThreeHero />
+          </div>
+          
+          {/* Grid overlay */}
+          <div className="absolute inset-0 grid-bg opacity-20 pointer-events-none z-[1]" />
 
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.8, delay: 1 }}
-                    className="flex flex-col items-center justify-center mt-8"
-                  >
-                    <div className="h-8 mb-4">
-                      <TypewriterEffect
-                        words={[
-                          "I'm a Web Developer",
-                          "I'm an ML Enthusiast",
-                          "I'm a Full-Stack Engineer",
-                          "I'm a UI/UX Designer",
-                          "I'm a Problem Solver",
-                        ]}
-                        speed={80}
-                        delay={2000}
-                      />
-                    </div>
-                  </motion.div>
+          {/* Gradient vignette */}
+          <div className="absolute inset-0 z-[2] pointer-events-none"
+            style={{
+              background: "radial-gradient(ellipse at center, transparent 0%, rgba(10,10,10,0.4) 70%, rgba(10,10,10,0.9) 100%)"
+            }}
+          />
 
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, delay: 1.3 }}
-                    className="flex flex-wrap gap-4 justify-center mt-8"
-                  >
-                    <motion.button
-                      onClick={() => scrollToSection(2)}
-                      className="neumorphic-btn-3d px-8 py-3 rounded-lg font-medium transition-all duration-300 hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer group relative"
-                      drag={!isTouch}
-                      dragElastic={0.1}
-                      dragMomentum
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <span className="inline-flex items-center gap-2">View Projects</span>
-                    </motion.button>
-                    <motion.button
-                      onClick={() => scrollToSection(5)}
-                      className="glassmorphic-btn-advanced px-8 py-3 rounded-lg font-medium cursor-pointer group relative"
-                      drag={!isTouch}
-                      dragElastic={0.1}
-                      dragMomentum
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <span className="inline-flex items-center gap-2">Contact Me</span>
-                    </motion.button>
-                  </motion.div>
-
-                </motion.div>
-
-                <div className="absolute inset-0 pointer-events-none z-0">
-                  {["1", "2", "3", "4", "5"].map((orb) => (
-                    <motion.div
-                      key={orb}
-                      className={`scene-orb orb-${orb} pointer-events-auto`}
-                      drag={!isTouch}
-                      dragElastic={0.12}
-                      dragMomentum
-                      dragTransition={{ power: 0.24, timeConstant: 180, bounceStiffness: 170, bounceDamping: 14 }}
-                      whileHover={{ scale: 1.1 }}
-                      whileDrag={{ scale: 1.14 }}
-                    />
-                  ))}
+          {/* Hero content */}
+          <div className="hero-content relative z-10 w-full px-4 md:px-12 flex flex-col items-center justify-center min-h-[100dvh]">
+            
+            {/* Profile photo with glow ring */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.5, y: 40 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
+              className="relative z-20 mb-8 mt-12 md:mt-0"
+            >
+              <div className="relative">
+                {/* Glow ring */}
+                <div className="absolute -inset-1 rounded-full opacity-40 blur-md"
+                  style={{ background: "linear-gradient(135deg, #10b981, #06b6d4)" }}
+                />
+                <div className="relative w-24 h-24 md:w-32 md:h-32 overflow-hidden rounded-full border-2 border-white/10 shadow-2xl">
+                  <img
+                    src="/arnav.png?height=200&width=200"
+                    alt="Arnav Joshi"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-b from-transparent to-emerald-900/20" />
                 </div>
               </div>
-            </VantaBackground>
-          </section>
+            </motion.div>
 
-          <section id="about" className="scene-panel relative">
-            <BrushStrokes />
-            <div className="container mx-auto px-4 h-full flex items-start pt-20 pb-4">
-              <motion.div className="scene-note scene-floating scene-card-shell w-full p-4 md:p-6" ref={registerFloating} drag={!isTouch} dragSnapToOrigin dragMomentum dragTransition={{ power: 0.24, timeConstant: 180, bounceStiffness: 170, bounceDamping: 14 }} dragElastic={0.12} whileDrag={{ rotate: -0.6, scale: 1.01 }}>
-                <About isTouch={isTouch} onContactClick={() => scrollToSection(5)} />
-              </motion.div>
-            </div>
-          </section>
+            {/* Name — massive typography */}
+            <motion.div 
+              initial={{ opacity: 0, y: 60 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1.4, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+              className="w-full text-center relative z-10 pointer-events-none mb-2"
+            >
+              <h1 
+                className="font-black tracking-tighter leading-[0.85]" 
+                style={{ 
+                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontSize: "clamp(3rem, 11vw, 10rem)",
+                  background: "linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.5) 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                ARNAV
+                <br />
+                JOSHI
+              </h1>
+            </motion.div>
 
-          <section id="skills" className="scene-panel relative">
-            <div className="container mx-auto px-4 h-full flex items-start pt-20 pb-4">
-              <motion.div className="scene-note scene-floating scene-card-shell w-full p-4 md:p-6" ref={registerFloating} drag={!isTouch} dragSnapToOrigin dragMomentum dragTransition={{ power: 0.24, timeConstant: 180, bounceStiffness: 170, bounceDamping: 14 }} dragElastic={0.1} whileDrag={{ rotate: 0.6, scale: 1.01 }}>
-                <Skills />
-              </motion.div>
-            </div>
-          </section>
+            {/* Subtitle area */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
+              className="mt-4 mb-10 flex flex-col items-center"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-8 h-[1px] bg-gradient-to-r from-transparent to-emerald-500/50" />
+                <div className="px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs md:text-sm tracking-[0.2em] uppercase shadow-[0_0_20px_rgba(16,185,129,0.15)]">
+                  Software Engineer
+                </div>
+                <div className="w-8 h-[1px] bg-gradient-to-l from-transparent to-emerald-500/50" />
+              </div>
+              <div className="h-8 md:h-10 text-lg md:text-2xl font-medium tracking-wide text-white/60">
+                <TypewriterEffect
+                  words={[
+                    "Backend Developer",
+                    "Full-Stack Builder",
+                    "Cloud & DevOps",
+                    "AI/ML Practitioner",
+                  ]}
+                  speed={80}
+                  delay={2000}
+                />
+              </div>
+            </motion.div>
 
-          <section id="projects" className="scene-panel relative">
-            <div className="container mx-auto px-4 h-full flex items-start pt-20 pb-4">
-              <motion.div className="scene-note scene-floating scene-card-shell w-full p-4 md:p-6" ref={registerFloating} drag={!isTouch} dragSnapToOrigin dragMomentum dragTransition={{ power: 0.24, timeConstant: 180, bounceStiffness: 170, bounceDamping: 14 }} dragElastic={0.1} whileDrag={{ rotate: -0.6, scale: 1.01 }}>
-                <Projects />
-              </motion.div>
-            </div>
-          </section>
+            {/* CTA Buttons — magnetic */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.7 }}
+              className="flex flex-wrap gap-5 justify-center"
+            >
+              <MagneticButton
+                onClick={() => scrollToSection(3)}
+                className="btn-accent px-8 py-4 rounded-full font-medium text-sm uppercase tracking-wider"
+              >
+                View Projects
+              </MagneticButton>
+              <MagneticButton
+                onClick={() => scrollToSection(6)}
+                className="glass-btn px-8 py-4 rounded-full font-medium text-sm uppercase tracking-wider"
+              >
+                Contact Me
+              </MagneticButton>
+            </motion.div>
 
-          <section id="experience" className="scene-panel relative">
-            <div className="container mx-auto px-4 h-full flex items-start pt-20 pb-4">
-              <motion.div className="scene-note scene-floating scene-card-shell w-full p-4 md:p-6" ref={registerFloating} drag={!isTouch} dragSnapToOrigin dragMomentum dragTransition={{ power: 0.24, timeConstant: 180, bounceStiffness: 170, bounceDamping: 14 }} dragElastic={0.1} whileDrag={{ rotate: 0.6, scale: 1.01 }}>
-                <Experience />
-              </motion.div>
-            </div>
-          </section>
-
-          <section id="contact" className="scene-panel relative">
-            <div className="container mx-auto px-4 h-full flex items-start pt-20 pb-4">
-              <motion.div className="scene-note scene-floating scene-card-shell w-full p-4 md:p-6" ref={registerFloating} drag={!isTouch} dragSnapToOrigin dragMomentum dragTransition={{ power: 0.24, timeConstant: 180, bounceStiffness: 170, bounceDamping: 14 }} dragElastic={0.1} whileDrag={{ rotate: -0.6, scale: 1.01 }}>
-                <Contact />
-              </motion.div>
-            </div>
-          </section>
-            </div>
+            {/* Scroll indicator */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.5, duration: 1 }}
+              className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+            >
+              <span className="text-[10px] tracking-[0.3em] uppercase text-white/20">Scroll</span>
+              <motion.div
+                animate={{ y: [0, 8, 0] }}
+                transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+                className="w-[1px] h-8 bg-gradient-to-b from-white/20 to-transparent"
+              />
+            </motion.div>
           </div>
-        </main>
-        <Chatbot />
-      </div>
-    </ThemeProvider>
+        </section>
+
+        {/* ═══ MARQUEE DIVIDER ═══ */}
+        <MarqueeText text="DESIGN · DEVELOP · DEPLOY · ITERATE" direction="left" />
+
+        {/* ═══════════════════════════════════════
+            ABOUT SECTION
+            ═══════════════════════════════════════ */}
+        <section id="about" className="relative py-24 md:py-32 min-h-screen flex items-center">
+          {/* Ambient orb */}
+          <div className="ambient-orb absolute top-20 -left-20 w-[500px] h-[500px] rounded-full opacity-[0.03] pointer-events-none"
+            style={{ background: "radial-gradient(circle, #10b981, transparent 70%)" }}
+          />
+          <div className="w-full relative z-10 reveal-section">
+             <About onContactClick={() => scrollToSection(6)} />
+          </div>
+        </section>
+
+        {/* ═══ MARQUEE DIVIDER ═══ */}
+        <MarqueeText text="JAVASCRIPT · PYTHON · REACT · NEXTJS · AWS · DOCKER · TENSORFLOW" direction="right" speed={0.8} />
+
+        {/* ═══════════════════════════════════════
+            SKILLS SECTION
+            ═══════════════════════════════════════ */}
+        <section id="skills" className="relative py-24 md:py-32 min-h-screen flex items-center">
+          <div className="ambient-orb absolute -right-20 top-1/2 w-[400px] h-[400px] rounded-full opacity-[0.03] pointer-events-none"
+            style={{ background: "radial-gradient(circle, #06b6d4, transparent 70%)" }}
+          />
+          <div className="w-full reveal-section">
+            <Skills />
+          </div>
+        </section>
+
+        {/* ═══ MARQUEE DIVIDER ═══ */}
+        <MarqueeText text="THREATDETECT · EDUBOT · CLIPMIND · MISINFORMATION AGENT" direction="left" speed={1.2} />
+
+        {/* ═══════════════════════════════════════
+            PROJECTS SECTION
+            ═══════════════════════════════════════ */}
+        <section id="projects" className="relative py-24 md:py-32 min-h-screen flex items-center">
+          <div className="ambient-orb absolute -left-32 bottom-20 w-[600px] h-[600px] rounded-full opacity-[0.02] pointer-events-none"
+            style={{ background: "radial-gradient(circle, #10b981, transparent 70%)" }}
+          />
+          <div className="w-full reveal-section">
+             <Projects />
+          </div>
+        </section>
+
+        {/* ═══ MARQUEE DIVIDER ═══ */}
+        <MarqueeText text="BUILD · SHIP · SCALE · OPTIMIZE · REPEAT" direction="right" />
+
+        {/* ═══════════════════════════════════════
+            EXPERIENCE SECTION
+            ═══════════════════════════════════════ */}
+        <section id="experience" className="relative py-24 md:py-32 min-h-screen flex items-center">
+          <div className="ambient-orb absolute right-0 top-32 w-[500px] h-[500px] rounded-full opacity-[0.025] pointer-events-none"
+            style={{ background: "radial-gradient(circle, #06b6d4, transparent 70%)" }}
+          />
+          <div className="w-full reveal-section">
+             <Experience />
+          </div>
+        </section>
+
+        {/* ═══════════════════════════════════════
+            CERTIFICATIONS SECTION
+            ═══════════════════════════════════════ */}
+        <section id="certifications" className="relative py-24 md:py-32 min-h-screen flex items-center">
+          <div className="ambient-orb absolute -left-20 bottom-40 w-[400px] h-[400px] rounded-full opacity-[0.03] pointer-events-none"
+            style={{ background: "radial-gradient(circle, #10b981, transparent 70%)" }}
+          />
+          <div className="w-full reveal-section">
+             <Certifications />
+          </div>
+        </section>
+
+        {/* ═══ MARQUEE DIVIDER ═══ */}
+        <MarqueeText text="LET'S CONNECT · LET'S BUILD · LET'S CREATE" direction="left" speed={0.6} />
+
+        {/* ═══════════════════════════════════════
+            CONTACT SECTION
+            ═══════════════════════════════════════ */}
+        <section id="contact" className="relative py-24 md:py-32 min-h-screen flex items-center">
+          <div className="ambient-orb absolute right-10 top-20 w-[500px] h-[500px] rounded-full opacity-[0.025] pointer-events-none"
+            style={{ background: "radial-gradient(circle, #10b981, transparent 70%)" }}
+          />
+          <div className="w-full reveal-section">
+             <Contact />
+          </div>
+        </section>
+
+        {/* ═══ FOOTER ═══ */}
+        <footer className="relative py-12 border-t border-white/[0.04]">
+          <div className="container mx-auto px-4 flex flex-col items-center gap-4">
+            <div className="text-2xl font-bold tracking-[-0.03em]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+              arnav<span className="text-emerald-400">.</span>
+            </div>
+            <p className="text-xs text-white/20 tracking-[0.15em] uppercase">
+              © {new Date().getFullYear()} Arnav Joshi · Built with Next.js & Three.js
+            </p>
+          </div>
+        </footer>
+
+      </main>
+      <Chatbot />
+    </div>
   )
 }
-

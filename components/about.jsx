@@ -4,123 +4,179 @@ import { useRef, useEffect } from "react"
 import { motion, useInView } from "framer-motion"
 import { gsap } from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
+import MagneticButton from "@/components/magnetic-button"
 
 gsap.registerPlugin(ScrollTrigger)
 
 // eslint-disable-next-line react/prop-types
-export default function About({ isTouch = false, onContactClick = () => {} }) {
+export default function About({ onContactClick = () => {} }) {
   const sectionRef = useRef(null)
   const textRef = useRef(null)
-  const isInView = useInView(sectionRef, { once: false, amount: 0.3 })
+  const statsRef = useRef(null)
+  const headingRef = useRef(null)
+  const isInView = useInView(sectionRef, { once: true, amount: 0.2 })
 
   useEffect(() => {
-    if (textRef.current) {
-      const textElement = textRef.current
+    if (!sectionRef.current) return
 
-      gsap.fromTo(
-        textElement.querySelectorAll("p"),
-        { opacity: 0, y: 20 },
-        {
-          opacity: 1,
-          y: 0,
-          stagger: 0.2,
+    const ctx = gsap.context(() => {
+      // Heading reveal
+      if (headingRef.current) {
+        gsap.from(headingRef.current, {
+          y: 30,
+          opacity: 0,
           duration: 0.8,
+          ease: "power3.out",
           scrollTrigger: {
-            trigger: textElement,
-            start: "top 80%",
-            end: "bottom 20%",
-            toggleActions: "play none none reverse",
-          },
-        },
-      )
-    }
+            trigger: headingRef.current,
+            start: "top 85%",
+          }
+        })
+      }
+
+      // Line-by-line text reveal
+      if (textRef.current) {
+        const paragraphs = textRef.current.querySelectorAll("p")
+        paragraphs.forEach((p, i) => {
+          gsap.from(p, {
+            y: 40,
+            opacity: 0,
+            duration: 1,
+            delay: i * 0.15,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: textRef.current,
+              start: "top 85%",
+            }
+          })
+        })
+      }
+
+      // Stats count-up
+      if (statsRef.current) {
+        const statNumbers = statsRef.current.querySelectorAll(".stat-value")
+        statNumbers.forEach((el) => {
+          const target = parseFloat(el.dataset.target)
+          const suffix = el.dataset.suffix || ""
+          const obj = { val: 0 }
+          gsap.to(obj, {
+            val: target,
+            duration: 2.5,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: statsRef.current,
+              start: "top 90%",
+            },
+            onUpdate: () => {
+              el.textContent = (target % 1 !== 0 ? obj.val.toFixed(2) : Math.round(obj.val)) + suffix
+            },
+          })
+        })
+
+        // Cards stagger in
+        const cards = statsRef.current.querySelectorAll(".stat-card")
+        gsap.from(cards, {
+          y: 40,
+          opacity: 0,
+          scale: 0.95,
+          stagger: 0.1,
+          duration: 0.8,
+          ease: "back.out(1.2)",
+          scrollTrigger: {
+            trigger: statsRef.current,
+            start: "top 85%",
+          }
+        })
+      }
+    }, sectionRef)
+
+    return () => ctx.revert()
   }, [])
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.2,
-      },
-    },
-  }
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.5 },
-    },
-  }
+  const stats = [
+    { value: 9.18, suffix: "", label: "CGPA" },
+    { value: 400, suffix: "+", label: "DSA Problems" },
+    { value: 200, suffix: "+", label: "Day Streak" },
+    { value: 4, suffix: "+", label: "Internships" },
+  ]
 
   return (
-    <div ref={sectionRef} className="w-full py-1 px-0">
+    <div ref={sectionRef} className="w-full py-1 px-4">
       <div className="container mx-auto max-w-5xl">
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate={isInView ? "visible" : "hidden"}
-          className="glassmorphic-card-advanced p-6 md:p-10 rounded-2xl overflow-hidden"
-          drag={!isTouch}
-          dragElastic={0.12}
-          dragMomentum
-          whileDrag={{ scale: 1.004, rotate: -0.25 }}
-        >
-          <motion.h2
-            variants={itemVariants}
-            className="text-3xl md:text-4xl font-bold text-center mb-6 text-gray-900 dark:text-gray-100"
-            drag={!isTouch}
-            dragElastic={0.08}
-            dragMomentum
-            whileDrag={{ rotate: -1, scale: 1.02 }}
-          >
-            About Me
-          </motion.h2>
+        <div className="relative group">
+          <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/20 via-cyan-500/20 to-emerald-500/20 rounded-[2rem] blur-xl opacity-50 group-hover:opacity-100 transition duration-1000 group-hover:duration-200" />
+          
+          <div className="glassmorphic-card-advanced relative p-8 md:p-12 rounded-[2rem] overflow-hidden">
+            {/* Top right subtle glow inside card */}
+            <div className="absolute -top-24 -right-24 w-48 h-48 bg-emerald-500/20 rounded-full blur-3xl" />
+            <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl" />
 
-          <div ref={textRef} className="space-y-6 relative">
-            <motion.p className="text-lg leading-relaxed" drag={!isTouch} dragElastic={0.08} dragMomentum whileDrag={{ rotate: -0.35, scale: 1.01 }}>
-              I'm <span className="font-semibold">Arnav Joshi</span>, a passionate full-stack developer with a deep
-              interest in creating innovative solutions that combine cutting-edge technology with elegant design. My
-              journey in software development began with a curiosity about how digital experiences are crafted, and has
-              evolved into a professional pursuit of excellence in web development, AI integration, and user experience
-              design.
-            </motion.p>
+            <div className="text-center mb-12">
+              <p className="text-xs tracking-[0.3em] uppercase text-emerald-400/60 mb-3">
+                Who I am
+              </p>
+              <h2
+                ref={headingRef}
+                className="text-4xl md:text-5xl font-bold mb-4"
+                style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+              >
+                About Me
+              </h2>
+              <div className="w-12 h-[2px] bg-gradient-to-r from-emerald-500 to-cyan-500 mx-auto" />
+            </div>
 
-            <motion.p className="text-lg leading-relaxed" drag={!isTouch} dragElastic={0.08} dragMomentum whileDrag={{ rotate: 0.35, scale: 1.01 }}>
-              With expertise in <span className="font-semibold">JavaScript, Python</span>, and various modern frameworks
-              like <span className="font-semibold">Next.js and React</span>, I build applications that are not only
-              functional but also intuitive and engaging. I believe that great software should be both powerful and
-              accessible, solving real problems while providing a seamless user experience.
-            </motion.p>
+            <div ref={textRef} className="space-y-6 relative max-w-3xl mx-auto text-center md:text-left">
+              <p className="text-base md:text-lg leading-relaxed text-white/70 font-light">
+                I'm <span className="font-medium text-white">Arnav Joshi</span>, a software engineer 
+                focused on building scalable backend systems, low-latency APIs, and secure applications. 
+                Currently pursuing <span className="font-medium text-emerald-400">B.Tech in Information Technology (Honors)</span> at 
+                Shri Ramdeobaba College of Engineering and Management, Nagpur with a <span className="font-medium text-emerald-400">9.18 CGPA</span>.
+              </p>
 
-            <motion.p className="text-lg leading-relaxed" drag={!isTouch} dragElastic={0.08} dragMomentum whileDrag={{ rotate: -0.2, scale: 1.01 }}>
-              When I'm not coding, you can find me participating in hackathons, contributing to open-source projects, or
-              exploring new technologies that push the boundaries of what's possible in software development.
-            </motion.p>
+              <p className="text-base md:text-lg leading-relaxed text-white/70 font-light">
+                Strong in data structures and problem solving — <span className="font-medium text-white">400+ DSA problems</span> solved 
+                across LeetCode and other platforms, with a <span className="font-medium text-white">200+ day coding and contribution streak</span>. 
+                I've contributed to open-source projects including <span className="text-cyan-400">Pizza CLI at OpenSauced</span> and <span className="text-cyan-400">AutoMQ</span>.
+              </p>
+
+              <p className="text-base md:text-lg leading-relaxed text-white/70 font-light">
+                Experienced with cloud platforms (<span className="font-medium text-white">AWS EC2, Lambda, S3, Azure</span>), 
+                CI/CD automation (<span className="font-medium text-white">GitHub Actions, Docker</span>), and distributed systems. 
+                Certified in Cloud Architecting and Data Engineering from AWS Academy, 
+                and Computer Vision from IBM.
+              </p>
+            </div>
+
+            {/* Stats Counter Row */}
+            <div ref={statsRef} className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mt-16 max-w-4xl mx-auto">
+              {stats.map((stat) => (
+                <div key={stat.label} className="stat-card relative group/card overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-cyan-500/5 opacity-0 group-hover/card:opacity-100 transition-opacity duration-500" />
+                  <div className="relative z-10 flex flex-col items-center justify-center h-full">
+                    <span
+                      className="stat-value stat-number text-3xl md:text-4xl mb-2 bg-clip-text text-transparent bg-gradient-to-br from-white to-white/70"
+                      data-target={stat.value}
+                      data-suffix={stat.suffix}
+                    >
+                      0
+                    </span>
+                    <p className="stat-label text-[10px] md:text-xs text-white/50 tracking-[0.2em]">{stat.label}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex justify-center mt-16 relative z-10">
+              <MagneticButton
+                onClick={onContactClick}
+                className="btn-accent px-10 py-4 rounded-full font-medium inline-block text-sm uppercase tracking-wider"
+              >
+                Get in Touch
+              </MagneticButton>
+            </div>
           </div>
-
-          <motion.div variants={itemVariants} className="flex justify-center mt-8">
-            <motion.button
-              type="button"
-              onClick={onContactClick}
-              className="neumorphic-btn-3d px-6 py-3 rounded-lg font-medium inline-block"
-              drag={!isTouch}
-              dragElastic={0.14}
-              dragMomentum
-              whileHover={{
-                scale: 1.05,
-                backgroundColor: "rgba(200, 200, 200, 0.2)",
-              }}
-              whileTap={{ scale: 0.95 }}
-            >
-              Get in Touch
-            </motion.button>
-          </motion.div>
-        </motion.div>
+        </div>
       </div>
     </div>
   )
 }
-

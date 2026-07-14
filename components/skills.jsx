@@ -1,204 +1,201 @@
 "use client"
 
-import { useMemo, useRef, useState } from "react"
-import { motion, useInView, useMotionValue, useSpring } from "framer-motion"
-import pretext from "pretext"
+import { useRef, useState, useEffect } from "react"
+import { motion } from "framer-motion"
+import { gsap } from "gsap"
+import { ScrollTrigger } from "gsap/ScrollTrigger"
+import TiltCard from "@/components/tilt-card"
 
-// eslint-disable-next-line react/prop-types
-function PretextChip({ html }) {
-  const x = useMotionValue(0)
-  const y = useMotionValue(0)
-  const mx = useSpring(x, { stiffness: 245, damping: 15, mass: 0.28 })
-  const my = useSpring(y, { stiffness: 245, damping: 15, mass: 0.28 })
-
-  return (
-    <motion.span
-      className="pretext-chip"
-      style={{ x: mx, y: my }}
-      drag
-      dragElastic={0.1}
-      dragMomentum
-      whileHover={{ scale: 1.03, rotate: -1 }}
-      whileDrag={{ scale: 1.02, rotate: 1 }}
-      dangerouslySetInnerHTML={{ __html: html }}
-    />
-  )
-}
+gsap.registerPlugin(ScrollTrigger)
 
 export default function Skills() {
   const sectionRef = useRef(null)
-  const isInView = useInView(sectionRef, { once: false, amount: 0.2 })
+  const barsRef = useRef(null)
   const [hoveredSkill, setHoveredSkill] = useState(null)
-
-  const skillTokens = ["*skills*", "/build/", "_tune_", "*flow*"]
-  const renderedSkillTokens = useMemo(() => {
-    const parser = typeof pretext === "function" ? pretext : pretext?.default
-    if (!parser) return skillTokens
-
-    return skillTokens.map((token) => {
-      try {
-        return parser(token).replace(/^<p>/, "").replace(/<\/p>$/, "")
-      } catch {
-        return token
-      }
-    })
-  }, [])
 
   const skillCategories = [
     {
       title: "Languages",
+      gradient: "from-emerald-400 to-emerald-600",
       skills: [
         { name: "JavaScript", level: 90 },
-        { name: "Python", level: 85 },
-        { name: "C", level: 75 },
+        { name: "TypeScript", level: 85 },
+        { name: "Python", level: 88 },
         { name: "Java", level: 80 },
+        { name: "C", level: 75 },
+        { name: "SQL", level: 82 },
       ],
     },
     {
-      title: "Frameworks & Libraries",
+      title: "Backend",
+      gradient: "from-cyan-400 to-blue-600",
       skills: [
-        { name: "Next.js", level: 95 },
+        { name: "Node.js", level: 88 },
+        { name: "Express", level: 85 },
+        { name: "Flask", level: 80 },
+        { name: "REST APIs", level: 92 },
+        { name: "FastAPI", level: 82 },
+        { name: "JWT / OAuth2", level: 85 },
+      ],
+    },
+    {
+      title: "Frontend",
+      gradient: "from-teal-400 to-emerald-600",
+      skills: [
         { name: "React", level: 92 },
-        { name: "Express", level: 88 },
-        { name: "Node.js", level: 85 },
-        { name: "Flask", level: 78 },
+        { name: "Next.js", level: 95 },
+        { name: "Tailwind CSS", level: 90 },
       ],
     },
     {
       title: "Databases",
+      gradient: "from-emerald-500 to-cyan-500",
       skills: [
+        { name: "PostgreSQL", level: 85 },
         { name: "MongoDB", level: 87 },
-        { name: "SQL", level: 82 },
-        { name: "Firebase", level: 90 },
+        { name: "Firebase", level: 88 },
+        { name: "Elasticsearch", level: 78 },
       ],
     },
     {
-      title: "AI & Cloud",
+      title: "Cloud & DevOps",
+      gradient: "from-blue-400 to-cyan-600",
+      skills: [
+        { name: "AWS (EC2, Lambda, S3)", level: 85 },
+        { name: "Azure", level: 72 },
+        { name: "Docker", level: 82 },
+        { name: "CI/CD", level: 85 },
+      ],
+    },
+    {
+      title: "AI / ML",
+      gradient: "from-cyan-400 to-teal-500",
       skills: [
         { name: "TensorFlow", level: 80 },
-        { name: "Hugging Face", level: 75 },
+        { name: "PyTorch", level: 75 },
         { name: "OpenCV", level: 82 },
-        { name: "AWS Lambda", level: 85 },
+        { name: "NLP", level: 78 },
       ],
     },
   ]
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
-  }
+  useEffect(() => {
+    if (!barsRef.current) return
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.5 },
-    },
-  }
+    const ctx = gsap.context(() => {
+      // Cards entrance
+      const cards = barsRef.current.querySelectorAll(".skill-category-card")
+      gsap.from(cards, {
+        y: 60,
+        opacity: 0,
+        scale: 0.95,
+        duration: 1,
+        stagger: 0.15,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: barsRef.current,
+          start: "top 85%",
+        }
+      })
+
+      // Animate skill bars
+      const bars = barsRef.current.querySelectorAll(".skill-fill")
+      gsap.from(bars, {
+        width: 0,
+        duration: 1.5,
+        stagger: 0.05,
+        ease: "power4.out",
+        scrollTrigger: {
+          trigger: barsRef.current,
+          start: "top 75%",
+        }
+      })
+    }, sectionRef)
+
+    return () => ctx.revert()
+  }, [])
 
   return (
-    <section id="skills" ref={sectionRef} className="w-full py-8 px-2">
+    <div ref={sectionRef} className="w-full py-8 px-4">
       <div className="container mx-auto max-w-6xl">
-        <motion.h2
-          initial={{ opacity: 0, y: -20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: -20 }}
-          transition={{ duration: 0.6 }}
-          className="text-3xl md:text-4xl font-bold text-center mb-8 text-gray-900 dark:text-gray-100"
-        >
-          Skills & Expertise
-        </motion.h2>
+        <div className="text-center mb-16">
+          <motion.p
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 0.4 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-xs tracking-[0.3em] uppercase text-emerald-400/60 mb-3"
+          >
+            Technologies
+          </motion.p>
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="text-4xl md:text-5xl font-bold mb-4"
+            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+          >
+            Skills & Expertise
+          </motion.h2>
+          <div className="w-12 h-[2px] bg-gradient-to-r from-emerald-500 to-cyan-500 mx-auto" />
+        </div>
 
-        <motion.div className="pretext-strip justify-center mb-6" initial={{ opacity: 0, y: 10 }} animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }} transition={{ duration: 0.4 }}>
-          {renderedSkillTokens.map((token) => (
-            <PretextChip key={token} html={token} />
-          ))}
-        </motion.div>
-
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate={isInView ? "visible" : "hidden"}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5"
-        >
+        <div ref={barsRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {skillCategories.map((category) => (
-            <motion.div
-              key={category.title}
-              variants={itemVariants}
-              className="glassmorphic-card-advanced p-6 rounded-xl"
-              drag
-              dragElastic={0.1}
-              dragMomentum
-              whileDrag={{ rotate: -0.6, scale: 1.01 }}
-              whileHover={{
-                y: -10,
-                boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
-              }}
-            >
-              <motion.h3
-                className="text-xl font-semibold mb-6 text-center"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                drag
-                dragElastic={0.06}
-                dragMomentum
-              >
-                {category.title}
-              </motion.h3>
-              <ul className="space-y-5">
-                {category.skills.map((skill, skillIndex) => (
-                  <motion.li
-                    key={skill.name}
-                    className="skill-item"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{
-                      duration: 0.5,
-                      delay: 0.3 + skillIndex * 0.1,
-                    }}
-                    onMouseEnter={() => setHoveredSkill(`${category.title}-${skill.name}`)}
-                    onMouseLeave={() => setHoveredSkill(null)}
-                    drag
-                    dragElastic={0.08}
-                    dragMomentum
-                    whileDrag={{ scale: 1.01, x: 2 }}
-                  >
-                    <div className="flex justify-between mb-1">
-                      <span className="text-sm font-medium">{skill.name}</span>
-                      <span className="text-xs font-semibold">{skill.level}%</span>
-                    </div>
-                    <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                      <motion.div
-                        className="h-full bg-gradient-to-r from-gray-500 to-gray-700 dark:from-gray-400 dark:to-gray-200"
-                        initial={{ width: 0 }}
-                        animate={{ width: `${skill.level}%` }}
-                        transition={{
-                          duration: 1.5,
-                          delay: 0.5 + skillIndex * 0.1,
-                          ease: "easeOut",
-                        }}
-                        style={{
-                          boxShadow:
-                            hoveredSkill === `${category.title}-${skill.name}`
-                              ? "0 0 10px rgba(255, 255, 255, 0.5)"
-                              : "none",
-                        }}
-                      />
-                    </div>
-                  </motion.li>
-                ))}
-              </ul>
-            </motion.div>
+            <TiltCard key={category.title} className="skill-category-card h-full" glowColor={category.gradient.includes('cyan') ? '6, 182, 212' : '16, 185, 129'}>
+              <div className="glassmorphic-card-advanced p-6 md:p-8 rounded-2xl h-full relative overflow-hidden group">
+                {/* Background ambient glow */}
+                <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${category.gradient} rounded-full blur-[50px] opacity-10 group-hover:opacity-20 transition-opacity duration-500`} />
+                
+                <div className="relative z-10">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className={`w-2 h-6 rounded-full bg-gradient-to-b ${category.gradient}`} />
+                    <h3
+                      className="text-lg font-bold tracking-wide"
+                      style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                    >
+                      {category.title}
+                    </h3>
+                  </div>
+
+                  <ul className="space-y-5">
+                    {category.skills.map((skill) => (
+                      <li
+                        key={skill.name}
+                        className="skill-item"
+                        onMouseEnter={() => setHoveredSkill(`${category.title}-${skill.name}`)}
+                        onMouseLeave={() => setHoveredSkill(null)}
+                      >
+                        <div className="flex justify-between mb-2">
+                          <span className={`text-sm font-medium transition-colors duration-300 ${hoveredSkill === `${category.title}-${skill.name}` ? 'text-white' : 'text-white/70'}`}>
+                            {skill.name}
+                          </span>
+                          <span className={`text-xs font-semibold tabular-nums transition-colors duration-300 ${hoveredSkill === `${category.title}-${skill.name}` ? 'text-emerald-400' : 'text-white/30'}`}>
+                            {skill.level}%
+                          </span>
+                        </div>
+                        <div className="h-[4px] bg-white/[0.04] rounded-full overflow-hidden shadow-inner">
+                          <div
+                            className={`skill-fill h-full rounded-full transition-shadow duration-300 bg-gradient-to-r ${category.gradient}`}
+                            style={{
+                              width: `${skill.level}%`,
+                              boxShadow:
+                                hoveredSkill === `${category.title}-${skill.name}`
+                                  ? "0 0 15px rgba(16, 185, 129, 0.5)"
+                                  : "none",
+                            }}
+                          />
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </TiltCard>
           ))}
-        </motion.div>
+        </div>
       </div>
-    </section>
+    </div>
   )
 }
-

@@ -1,19 +1,74 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { motion } from "framer-motion"
 import { useTheme } from "next-themes"
 import { Sun, Moon, Menu, X } from "lucide-react"
+import { gsap } from "gsap"
 
 // eslint-disable-next-line react/prop-types
 export default function Navbar({ activeSection = "home", onNavigate = () => {}, scrolled = false }) {
   const [isOpen, setIsOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
   const { theme, setTheme } = useTheme()
+  const navRef = useRef(null)
+  const brandRef = useRef(null)
 
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  // GSAP stagger entrance for nav items
+  useEffect(() => {
+    if (!navRef.current || !mounted) return
+
+    const ctx = gsap.context(() => {
+      const items = navRef.current.querySelectorAll(".nav-item")
+      gsap.from(items, {
+        y: -30,
+        opacity: 0,
+        duration: 0.6,
+        stagger: 0.05,
+        ease: "power3.out",
+        delay: 0.2,
+      })
+
+      // Brand entrance
+      if (brandRef.current) {
+        gsap.from(brandRef.current, {
+          x: -20,
+          opacity: 0,
+          duration: 0.8,
+          ease: "power3.out",
+        })
+      }
+    }, navRef)
+
+    return () => ctx.revert()
+  }, [mounted])
+
+  // Magnetic effect on brand name
+  useEffect(() => {
+    if (!brandRef.current || typeof window === "undefined") return
+
+    const el = brandRef.current
+    const handleMouseMove = (e) => {
+      const rect = el.getBoundingClientRect()
+      const x = (e.clientX - rect.left - rect.width / 2) * 0.15
+      const y = (e.clientY - rect.top - rect.height / 2) * 0.15
+      gsap.to(el, { x, y, duration: 0.4, ease: "power2.out" })
+    }
+    const handleMouseLeave = () => {
+      gsap.to(el, { x: 0, y: 0, duration: 0.7, ease: "elastic.out(1, 0.4)" })
+    }
+
+    el.addEventListener("mousemove", handleMouseMove)
+    el.addEventListener("mouseleave", handleMouseLeave)
+    return () => {
+      el.removeEventListener("mousemove", handleMouseMove)
+      el.removeEventListener("mouseleave", handleMouseLeave)
+    }
+  }, [mounted])
 
   const navItems = [
     { name: "Home", id: "home" },
@@ -21,6 +76,7 @@ export default function Navbar({ activeSection = "home", onNavigate = () => {}, 
     { name: "Skills", id: "skills" },
     { name: "Projects", id: "projects" },
     { name: "Experience", id: "experience" },
+    { name: "Certifications", id: "certifications" },
     { name: "Contact", id: "contact" },
   ]
 
@@ -30,28 +86,29 @@ export default function Navbar({ activeSection = "home", onNavigate = () => {}, 
 
   return (
     <motion.nav
+      ref={navRef}
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.5 }}
-      className={`fixed w-full z-50 px-4 py-4 md:py-6 transition-all duration-300 ${
-        scrolled ? "glassmorphic-nav-scrolled backdrop-blur-lg" : "glassmorphic-nav"
+      className={`fixed w-full z-50 px-4 py-4 md:py-5 transition-all duration-500 ${
+        scrolled ? "glassmorphic-nav-scrolled" : "glassmorphic-nav"
       }`}
     >
       <div className="container mx-auto flex justify-between items-center">
         <motion.button
+          ref={brandRef}
           type="button"
           onClick={() => onNavigate(0)}
           className="relative group"
-          whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          <span className="text-2xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-400">
-            ArnavJ
+          <span
+            className="text-xl font-bold tracking-[-0.03em] text-white"
+            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+          >
+            arnav
+            <span className="text-emerald-400">.</span>
           </span>
-          <motion.span
-            className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-gray-400 to-gray-600 dark:from-gray-400 dark:to-gray-200 group-hover:w-full transition-all duration-300"
-            whileHover={{ width: "100%" }}
-          />
         </motion.button>
 
         {/* Mobile menu button */}
@@ -59,31 +116,31 @@ export default function Navbar({ activeSection = "home", onNavigate = () => {}, 
           <motion.button
             onClick={() => setIsOpen(!isOpen)}
             className="neumorphic-btn-3d p-2 rounded-lg"
-            whileHover={{ scale: 1.1, backgroundColor: "rgba(200, 200, 200, 0.2)" }}
+            whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             aria-label="Toggle menu"
           >
-            {isOpen ? <X size={24} /> : <Menu size={24} />}
+            {isOpen ? <X size={22} /> : <Menu size={22} />}
           </motion.button>
         </div>
 
         {/* Desktop menu */}
-        <div className="hidden md:flex items-center space-x-8">
+        <div className="hidden md:flex items-center space-x-6">
           {navItems.map((item) => (
             <motion.button
               type="button"
               key={item.id}
               onClick={() => onNavigate(navItems.findIndex((navItem) => navItem.id === item.id))}
-              className={`relative text-sm font-medium nav-link ${
-                activeSection === item.id ? "active-nav-link" : ""
+              className={`nav-item relative text-xs font-medium tracking-[0.05em] uppercase nav-link transition-colors duration-300 ${
+                activeSection === item.id ? "text-emerald-400 active-nav-link" : "text-white/50 hover:text-white/80"
               }`}
-              whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
               {item.name}
               {activeSection === item.id && (
                 <motion.span
-                  className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-gray-400 to-gray-600 dark:from-gray-400 dark:to-gray-200"
+                  className="absolute -bottom-1 left-0 w-full h-[2px]"
+                  style={{ background: "#10b981" }}
                   layoutId="activeSection"
                   transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 />
@@ -95,13 +152,13 @@ export default function Navbar({ activeSection = "home", onNavigate = () => {}, 
         {/* Theme toggle */}
         {mounted && (
           <motion.button
-            whileHover={{ scale: 1.1, backgroundColor: "rgba(200, 200, 200, 0.2)" }}
+            whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={toggleTheme}
-            className="neumorphic-btn-3d p-2 rounded-full ml-4 hidden md:block"
+            className="nav-item neumorphic-btn-3d p-2 rounded-full ml-4 hidden md:block"
             aria-label="Toggle theme"
           >
-            {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
+            {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
           </motion.button>
         )}
       </div>
@@ -115,18 +172,20 @@ export default function Navbar({ activeSection = "home", onNavigate = () => {}, 
           transition={{ duration: 0.3 }}
           className="md:hidden glassmorphic-dropdown-advanced mt-2 py-4 rounded-lg"
         >
-          <div className="flex flex-col space-y-4 px-4">
+          <div className="flex flex-col space-y-3 px-4">
             {navItems.map((item) => (
                 <motion.button
                   type="button"
                   key={item.id}
-                  className={`text-center py-2 ${activeSection === item.id ? "font-bold" : ""}`}
+                  className={`text-center py-2 text-sm tracking-[0.05em] uppercase transition-colors duration-300 ${
+                    activeSection === item.id ? "text-emerald-400 font-bold" : "text-white/50"
+                  }`}
                   onClick={() => {
                     onNavigate(navItems.findIndex((navItem) => navItem.id === item.id))
                     setIsOpen(false)
                   }}
                   whileHover={{
-                    backgroundColor: "rgba(200, 200, 200, 0.1)",
+                    backgroundColor: "rgba(16, 185, 129, 0.05)",
                     scale: 1.02,
                   }}
                   transition={{ duration: 0.2 }}
@@ -137,18 +196,18 @@ export default function Navbar({ activeSection = "home", onNavigate = () => {}, 
             {mounted && (
               <motion.button
                 onClick={toggleTheme}
-                className="neumorphic-btn-3d py-2 rounded-lg flex justify-center items-center"
-                whileHover={{ backgroundColor: "rgba(200, 200, 200, 0.1)" }}
+                className="neumorphic-btn-3d py-2 rounded-lg flex justify-center items-center text-sm"
+                whileHover={{ backgroundColor: "rgba(16, 185, 129, 0.05)" }}
                 whileTap={{ scale: 0.98 }}
                 aria-label="Toggle theme"
               >
                 {theme === "dark" ? (
                   <>
-                    <Sun size={20} className="mr-2" /> Light Mode
+                    <Sun size={18} className="mr-2" /> Light Mode
                   </>
                 ) : (
                   <>
-                    <Moon size={20} className="mr-2" /> Dark Mode
+                    <Moon size={18} className="mr-2" /> Dark Mode
                   </>
                 )}
               </motion.button>
@@ -159,4 +218,3 @@ export default function Navbar({ activeSection = "home", onNavigate = () => {}, 
     </motion.nav>
   )
 }
-

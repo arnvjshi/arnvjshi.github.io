@@ -1,21 +1,31 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import { Analytics } from "@vercel/analytics/react";
+import { ThemeProvider } from "@/components/theme-provider"
+import SmoothScroll from "@/components/smooth-scroll";
 
 export const metadata: Metadata = {
-  title: "Arnav Joshi | Full Stack Developer & Tech Enthusiast",
-  description: "Portfolio of Arnav Joshi - Full Stack Developer skilled in Next.js, MongoDB, AWS, and Web3. Passionate about competitive coding and building innovative applications.",
+  title: "Arnav Joshi | Software Engineer & Full Stack Developer",
+  description: "Portfolio of Arnav Joshi — Software Engineer specializing in scalable backend systems, low-latency APIs, and AI/ML solutions. Experienced with AWS, Docker, Next.js, and modern full-stack architectures.",
   keywords: [
     "Arnav Joshi", 
+    "Software Engineer",
     "Full Stack Developer", 
-    "Software Engineer", 
-    "Next.js Developer", 
-    "MongoDB", 
-    "AWS Developer", 
-    "Web3", 
-    "Competitive Programming", 
-    "Blockchain", 
-    "Cloud Computing", 
+    "Backend Developer",
+    "Next.js Developer",
+    "TypeScript",
+    "Python",
+    "FastAPI",
+    "PostgreSQL", 
+    "MongoDB",
+    "AWS Developer",
+    "Docker",
+    "CI/CD",
+    "PyTorch",
+    "TensorFlow",
+    "Cloud Computing",
+    "REST APIs",
+    "Microservices",
     "Shri Ramdeobaba College of Engineering", 
     "RCOEM", 
     "Ramdeobaba University", 
@@ -24,8 +34,8 @@ export const metadata: Metadata = {
   ],
   generator: "arnavjoshi.vercel.app",
   openGraph: {
-    title: "Arnav Joshi | Full Stack Developer & Tech Enthusiast",
-    description: "Explore Arnav Joshi's portfolio showcasing expertise in Next.js, MongoDB, AWS, and Web3 development.",
+    title: "Arnav Joshi | Software Engineer & Full Stack Developer",
+    description: "Explore Arnav Joshi's portfolio showcasing expertise in scalable backend systems, AI/ML solutions, and modern full-stack development.",
     url: "https://arnavjoshi.vercel.app",
     siteName: "Arnav Joshi Portfolio",
     images: [
@@ -40,8 +50,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Arnav Joshi | Full Stack Developer & Tech Enthusiast",
-    description: "Portfolio of Arnav Joshi - Full Stack Developer with expertise in Next.js, MongoDB, AWS, and Web3.",
+    title: "Arnav Joshi | Software Engineer & Full Stack Developer",
+    description: "Portfolio of Arnav Joshi — Software Engineer building scalable backend systems, low-latency APIs, and AI/ML solutions.",
     images: ["/arnav.png"],
   },
   icons: {
@@ -66,9 +76,20 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <Analytics/>
-      <body>{children}</body>
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+      </head>
+      <body>
+        <ThemeProvider defaultTheme="dark" attribute="class">
+          <SmoothScroll>
+            {children}
+          </SmoothScroll>
+        </ThemeProvider>
+        <Analytics />
+      </body>
     </html>
   )
 }

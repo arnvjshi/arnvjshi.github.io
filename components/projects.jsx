@@ -1,332 +1,239 @@
 "use client"
 
-import { useRef, useState } from "react"
-import { motion, useInView, AnimatePresence } from "framer-motion"
-import { ExternalLink, ChevronLeft, ChevronRight, Github } from "lucide-react"
+import { useRef, useState, useEffect } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import { ChevronLeft, ChevronRight, Github, Shield, BookOpen, Search, Video, ExternalLink } from "lucide-react"
+import { gsap } from "gsap"
+import { ScrollTrigger } from "gsap/ScrollTrigger"
+import TiltCard from "@/components/tilt-card"
+
+gsap.registerPlugin(ScrollTrigger)
 
 export default function Projects() {
   const sectionRef = useRef(null)
-  const isInView = useInView(sectionRef, { once: false, amount: 0.1 })
+  const cardsRef = useRef(null)
   const [activeProject, setActiveProject] = useState(0)
 
   const projects = [
     {
-      title: "Smart Shopping System",
-      description: "An intelligent e-commerce platform with personalized recommendations and inventory management.",
-      technologies: ["Next.js", "MongoDB", "AWS Lambda"],
-      image: "/smart-shop.png?height=400&width=600",
-      github: "https://github.com/arnvjshi/Smart-Shop",
-      demo: "https://smart-shopping-ss.vercel.app/",
-    },
-    {
-      title: "Top-Down Retro Game",
-      description: "A nostalgic 2D game with pixel art graphics and classic gameplay mechanics.",
-      technologies: ["JavaScript", "Tiled", "PNG Assets"],
-      image: "/iq.png?height=400&width=600",
-      github: "https://github.com/arnvjshi/MiniGames-colosseum",
-      demo: "https://arnvjshi.github.io/MiniGames-colosseum/",
-    },
-    {
-      title: "Flask AI Chatbot",
-      description: "An AI-powered chatbot built with Flask and Hugging Face's transformer models.",
-      technologies: ["Flask", "Python", "Hugging Face"],
-      image: "/chat-bot.png?height=400&width=600",
-      github: "https://github.com/arnvjshi/Flask-AI-Chatbot",
-      demo: "#",
-    },
-    {
-      title: "Blockchain-Based Transaction System",
-      description: "A secure and transparent platform for managing digital transactions using blockchain technology.",
-      technologies: ["React", "Solidity", "Web3.js"],
-      image: "/block-chain.png?height=400&width=600",
-      github: "https://github.com/arnvjshi/BlockChain-Transaction-System",
-      demo: "#",
-    },
-    {
-      title: "CyberLab",
+      title: "ThreatDetect Dashboard",
+      badge: "",
       description:
-        'A software to book and manage lab appointments, track equipment usage, and generate reports for research labs.',
-      technologies: ["Next.js", "MongoDB", "AWS Lambda"],
-      image: "/cyber-lab.png?height=400&width=600",
-      github: "https://github.com/arnvjshi/CyberLab",
-      demo: "https://cyber-lab.vercel.app/",
+        "A real-time multimodal AI surveillance system with 97.4% threat detection accuracy using video, audio, and NLP fusion. Integrated YOLOv8, audio CNNs, and Llama 3.1 for intelligent anomaly detection.",
+      technologies: ["Next.js", "FastAPI", "TensorFlow", "YOLOv8n", "NLP"],
+      icon: <Shield className="w-5 h-5" />,
+      highlight: "97.4% accuracy",
+      gradient: "from-emerald-500/20 to-cyan-500/10",
+      github: "https://github.com/arnvjshi/ThreatShield",
     },
     {
-      title: "Other Projects",
+      title: "EduBot",
+      badge: "LIVE",
       description:
-        'You can view more of my projects on my GitHub profile.',
-      technologies: ["React", "Next.js", "Node.js, etc."],
-      image: "/github.png?height=400&width=600",
-      github: "https://github.com/arnvjshi/",
-      demo: "https://github.com/arnvjshi/",
+        "AI-powered learning platform with dynamic content generation. Generates explanations, flashcards, MCQs, and quizzes using Gemini APIs. User preference handling for personalized learning.",
+      technologies: ["Next.js", "Flask", "Gemini", "REST APIs"],
+      icon: <BookOpen className="w-5 h-5" />,
+      highlight: "AI-Powered Learning",
+      gradient: "from-cyan-500/20 to-emerald-500/10",
+      github: "https://github.com/arnvjshi/Edubot",
+      live: "https://edu-bot-six.vercel.app/",
+    },
+    {
+      title: "AI Misinformation Detection",
+      badge: "LIVE",
+      description:
+        "Multimodal agent integrating text, audio, and image analysis to identify misinformation with 92% accuracy. Elasticsearch for fast semantic retrieval, AWS Lambda for serverless inference.",
+      technologies: ["Next.js", "Flask", "Elasticsearch", "HuggingFace", "AWS"],
+      icon: <Search className="w-5 h-5" />,
+      highlight: "92% accuracy · 40% faster",
+      gradient: "from-emerald-500/15 to-teal-500/10",
+      github: "https://github.com/arnvjshi/AI-Misinformation-Detection-Agent",
+      live: "https://vericrisis.vercel.app/",
+    },
+    {
+      title: "ClipMind AI",
+      badge: "",
+      description:
+        "Lightweight AI agent using Gemini for identifying and generating high-engagement video clips. AI-driven video analysis pipeline for highlight detection and smart clipping.",
+      technologies: ["Agentic AI", "Video Processing", "FFmpeg", "Streamlit"],
+      icon: <Video className="w-5 h-5" />,
+      highlight: "AI Video Clipping",
+      gradient: "from-teal-500/20 to-emerald-500/10",
+      github: "https://github.com/arnvjshi/YT-Video-Cutter-agent",
     },
   ]
 
-  const nextProject = () => {
-    setActiveProject((prev) => (prev === projects.length - 1 ? 0 : prev + 1))
-  }
+  useEffect(() => {
+    if (!cardsRef.current) return
 
-  const prevProject = () => {
-    setActiveProject((prev) => (prev === 0 ? projects.length - 1 : prev - 1))
-  }
+    const ctx = gsap.context(() => {
+      const cards = cardsRef.current.querySelectorAll(".project-card")
+      cards.forEach((card, i) => {
+        gsap.from(card, {
+          y: 80,
+          opacity: 0,
+          rotateX: 5,
+          duration: 1,
+          delay: i * 0.15,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: card,
+            start: "top 90%",
+          }
+        })
+      })
+    }, sectionRef)
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.2,
-      },
-    },
-  }
+    return () => ctx.revert()
+  }, [])
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 50 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.6, ease: "easeOut" },
-    },
-  }
+  const nextProject = () => setActiveProject((prev) => (prev === projects.length - 1 ? 0 : prev + 1))
+  const prevProject = () => setActiveProject((prev) => (prev === 0 ? projects.length - 1 : prev - 1))
+
+  const renderProjectCard = (project, isMobile = false) => (
+    <div className={`relative overflow-hidden rounded-2xl ${isMobile ? '' : 'project-card'}`}>
+      {/* Gradient top accent */}
+      <div className={`absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r ${project.gradient}`} />
+
+      <div className="glassmorphic-card-advanced rounded-2xl overflow-hidden h-full">
+        {/* Header with gradient background */}
+        <div className="relative p-6 pb-4">
+          <div className={`absolute inset-0 bg-gradient-to-br ${project.gradient} opacity-30`} />
+          <div className="relative">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-emerald-500/15 text-emerald-400 backdrop-blur-sm border border-emerald-500/10">
+                  {project.icon}
+                </div>
+                <div>
+                  <h3 className="text-lg md:text-xl font-bold tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                    {project.title}
+                  </h3>
+                  <span className="text-xs text-emerald-400/80 font-medium tracking-wide">{project.highlight}</span>
+                </div>
+              </div>
+              {project.badge && (
+                <span className="text-[10px] tracking-[0.15em] uppercase px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 backdrop-blur-sm">
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse" />
+                  {project.badge}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Body */}
+        <div className="p-6 pt-2">
+          <p className="mb-5 text-sm text-white/55 leading-relaxed">{project.description}</p>
+
+          <div className="flex flex-wrap gap-2 mb-5">
+            {project.technologies.map((tech) => (
+              <span
+                key={tech}
+                className="text-[11px] px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-white/50 hover:text-emerald-400 hover:border-emerald-500/20 transition-colors duration-300"
+              >
+                {tech}
+              </span>
+            ))}
+          </div>
+
+          <div className="flex flex-wrap gap-4">
+            <a
+              href={project.github}
+              className="group flex items-center gap-2 text-xs text-white/40 hover:text-emerald-400 transition-colors duration-300"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Github size={16} />
+              <span className="group-hover:underline underline-offset-4">Source Code</span>
+            </a>
+            {project.live && (
+              <a
+                href={project.live}
+                className="group flex items-center gap-2 text-xs text-white/40 hover:text-emerald-400 transition-colors duration-300"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <ExternalLink size={16} />
+                <span className="group-hover:underline underline-offset-4">Live Demo</span>
+              </a>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 
   return (
-    <section id="projects" ref={sectionRef} className="w-full py-8 px-2">
+    <div ref={sectionRef} className="w-full py-8 px-4">
       <div className="container mx-auto max-w-6xl">
-        <motion.h2
-          initial={{ opacity: 0, y: -20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: -20 }}
-          transition={{ duration: 0.6 }}
-          className="text-3xl md:text-4xl font-bold text-center mb-10 bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-400"
-        >
-          Featured Projects
-        </motion.h2>
+        {/* Section header */}
+        <div className="text-center mb-12">
+          <motion.p
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 0.4 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-xs tracking-[0.3em] uppercase text-emerald-400/60 mb-3"
+          >
+            Portfolio
+          </motion.p>
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="text-4xl md:text-5xl font-bold mb-4"
+            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+          >
+            Featured Projects
+          </motion.h2>
+          <div className="w-12 h-[2px] bg-gradient-to-r from-emerald-500 to-cyan-500 mx-auto" />
+        </div>
 
-        {/* Mobile Project Carousel */}
+        {/* Mobile Carousel */}
         <div className="md:hidden relative">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeProject}
-              initial={{ opacity: 0, x: 100 }}
+              initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -100 }}
+              exit={{ opacity: 0, x: -50 }}
               transition={{ duration: 0.3 }}
-              className="glassmorphic-card-advanced rounded-xl overflow-hidden"
-              drag
-              dragElastic={0.1}
-              dragMomentum
-              whileDrag={{ rotate: -0.8, scale: 1.01 }}
             >
-              <motion.div className="relative overflow-hidden h-48" drag dragElastic={0.08} dragMomentum whileDrag={{ scale: 1.01, rotate: 0.25 }}>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10 flex items-end">
-                  <h3 className="text-white text-xl font-bold p-4">{projects[activeProject].title}</h3>
-                </div>
-                <img
-                  src={projects[activeProject].image || "/placeholder.svg"}
-                  alt={projects[activeProject].title}
-                  className="w-full h-full object-cover"
-                />
-              </motion.div>
-
-              <div className="p-6">
-                <p className="mb-4">{projects[activeProject].description}</p>
-
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {projects[activeProject].technologies.map((tech) => (
-                    <span key={tech} className="text-xs px-2 py-1 rounded-full neumorphic-pill">
-                      {tech}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="flex justify-between mt-4">
-                  <motion.a
-                    href={projects[activeProject].github}
-                    className="neumorphic-btn-3d p-2 rounded-lg"
-                    drag
-                    dragElastic={0.08}
-                    dragMomentum
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    aria-label="View GitHub repository"
-                  >
-                    <Github size={20} />
-                  </motion.a>
-
-                  <motion.a
-                    href={projects[activeProject].demo}
-                    className="neumorphic-btn-3d p-2 rounded-lg"
-                    drag
-                    dragElastic={0.08}
-                    dragMomentum
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    aria-label="View live demo"
-                  >
-                    <ExternalLink size={20} />
-                  </motion.a>
-                </div>
-              </div>
+              {renderProjectCard(projects[activeProject], true)}
             </motion.div>
           </AnimatePresence>
 
-          <div className="flex justify-between mt-4">
-            <motion.button
-              onClick={prevProject}
-              className="neumorphic-btn-3d p-2 rounded-full"
-              drag
-              dragElastic={0.08}
-              dragMomentum
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-            >
+          <div className="flex justify-between items-center mt-5">
+            <motion.button onClick={prevProject} className="neumorphic-btn-3d p-2.5 rounded-full" whileTap={{ scale: 0.9 }}>
               <ChevronLeft size={20} />
             </motion.button>
-
             <div className="flex space-x-2">
-              {projects.map((project, index) => (
-                <motion.button
-                  key={project.title}
+              {projects.map((_, index) => (
+                <button
+                  key={index}
                   onClick={() => setActiveProject(index)}
-                  className={`w-2 h-2 rounded-full ${
-                    index === activeProject ? "bg-gray-800 dark:bg-gray-200" : "bg-gray-300 dark:bg-gray-700"
-                  }`}
-                  drag
-                  dragElastic={0.08}
-                  dragMomentum
-                  whileHover={{ scale: 1.2 }}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${index === activeProject ? "bg-emerald-500 w-8" : "bg-white/15 w-1.5"
+                    }`}
                 />
               ))}
             </div>
-
-            <motion.button
-              onClick={nextProject}
-              className="neumorphic-btn-3d p-2 rounded-full"
-              drag
-              dragElastic={0.12}
-              dragMomentum
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-            >
+            <motion.button onClick={nextProject} className="neumorphic-btn-3d p-2.5 rounded-full" whileTap={{ scale: 0.9 }}>
               <ChevronRight size={20} />
             </motion.button>
           </div>
         </div>
 
-        {/* Desktop Project Grid */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate={isInView ? "visible" : "hidden"}
-          className="hidden md:grid md:grid-cols-2 gap-6"
-        >
+        {/* Desktop Grid with Tilt */}
+        <div ref={cardsRef} className="hidden md:grid md:grid-cols-2 gap-6">
           {projects.map((project) => (
-            <motion.div
-              key={project.title}
-              variants={itemVariants}
-              className="glassmorphic-card-advanced rounded-xl overflow-hidden transform-gpu"
-              drag
-              dragElastic={0.1}
-              dragMomentum
-              whileDrag={{ rotate: -0.8, scale: 1.01 }}
-              whileHover={{
-                y: -10,
-                scale: 1.02,
-                boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
-              }}
-              transition={{ duration: 0.3 }}
-            >
-              <motion.div
-                className="relative overflow-hidden h-48 md:h-64"
-                drag
-                dragElastic={0.08}
-                dragMomentum
-                whileHover={{ scale: 1.05 }}
-                transition={{ duration: 0.5 }}
-              >
-                <motion.div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 z-10 flex items-end">
-                  <motion.h3
-                    className="text-white text-xl font-bold p-4"
-                    initial={{ y: 20, opacity: 0 }}
-                    whileHover={{ y: 0, opacity: 1 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    {project.title}
-                  </motion.h3>
-                </motion.div>
-                <motion.img
-                  src={project.image}
-                  alt={project.title}
-                  className="w-full h-full object-cover"
-                  drag
-                  whileHover={{
-                    scale: 1.1,
-                    filter: "brightness(0.8)",
-                  }}
-                  transition={{ duration: 0.5 }}
-                />
-              </motion.div>
-
-              <div className="p-6">
-                <h3 className="text-xl font-bold mb-2">{project.title}</h3>
-                <p className="mb-4">{project.description}</p>
-
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {project.technologies.map((tech) => (
-                    <motion.span
-                      key={tech}
-                      className="text-xs px-2 py-1 rounded-full neumorphic-pill"
-                      whileHover={{
-                        scale: 1.1,
-                        backgroundColor: "rgba(200, 200, 200, 0.2)",
-                      }}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{
-                        duration: 0.3,
-                        delay: 0.1 * project.technologies.indexOf(tech),
-                      }}
-                    >
-                      {tech}
-                    </motion.span>
-                  ))}
-                </div>
-
-                <div className="flex justify-between mt-4">
-                  <motion.a
-                    href={project.github}
-                    className="neumorphic-btn-3d p-2 rounded-lg"
-                    whileHover={{
-                      scale: 1.1,
-                      backgroundColor: "rgba(200, 200, 200, 0.2)",
-                    }}
-                    whileTap={{ scale: 0.9 }}
-                    aria-label="View GitHub repository"
-                  >
-                    <Github size={20} />
-                  </motion.a>
-
-                  <motion.a
-                    drag
-                    dragElastic={0.08}
-                    dragMomentum
-                    href={project.demo}
-                    className="neumorphic-btn-3d p-2 rounded-lg"
-                    whileHover={{
-                      scale: 1.1,
-                      backgroundColor: "rgba(200, 200, 200, 0.2)",
-                    }}
-                    whileTap={{ scale: 0.9 }}
-                    aria-label="View live demo"
-                  >
-                    <ExternalLink size={20} />
-                  </motion.a>
-                </div>
-              </div>
-            </motion.div>
+            <TiltCard key={project.title} className="h-full">
+              {renderProjectCard(project)}
+            </TiltCard>
           ))}
-        </motion.div>
+        </div>
       </div>
-    </section>
+    </div>
   )
 }
-

@@ -57,30 +57,40 @@ export default function Chatbot() {
 
       if (userMessage.includes("hello") || userMessage.includes("hi") || userMessage.includes("hey")) {
         botResponse = "Hello! How can I assist you with Arnav's portfolio today?"
-      } else if (userMessage.includes("project") || userMessage.includes("work")) {
+      } else if (userMessage.includes("project") || userMessage.includes("work") || userMessage.includes("built")) {
         botResponse =
-          "Arnav has worked on several exciting projects including web applications, AI solutions, and mobile apps. You can check them out in the Projects section!"
+          "Arnav has built some impressive projects! ThreatDetect Dashboard (97.4% accuracy AI surveillance), EduBot (AI learning platform with Gemini), AI Misinformation Detection Agent (92% accuracy), and ClipMind AI (video highlight detection). Check the Projects section for details!"
       } else if (userMessage.includes("contact") || userMessage.includes("hire") || userMessage.includes("email")) {
         botResponse =
-          "You can contact Arnav through the Contact form on this page, or directly via email at arnavjoshi0512@gmail.com"
-      } else if (userMessage.includes("experience") || userMessage.includes("background")) {
+          "You can reach Arnav at arnvjshi@gmail.com, connect on LinkedIn (arnav-joshi-aj05), or use the Contact form on this page!"
+      } else if (userMessage.includes("experience") || userMessage.includes("intern") || userMessage.includes("work")) {
         botResponse =
-          "Arnav has experience in full-stack development, machine learning, and UI/UX design. Check out the Experience section for more details!"
+          "Arnav has interned at AILifeBot (Software Developer, building REST APIs), Youniformwala (Full Stack Developer, Next.js + FastAPI e-Commerce platform), EduSkills/AWS Academy (Cloud Virtual Intern), and CompEx 2025 (Tech Intern, React + Firebase). Check the Experience section!"
       } else if (
         userMessage.includes("skill") ||
         userMessage.includes("technology") ||
-        userMessage.includes("tech stack")
+        userMessage.includes("tech stack") ||
+        userMessage.includes("language")
       ) {
         botResponse =
-          "Arnav is proficient in JavaScript, Python, React, Next.js, Node.js, and various ML frameworks. The Skills section has a complete breakdown!"
-      } else if (userMessage.includes("education") || userMessage.includes("study") || userMessage.includes("degree")) {
+          "Arnav is proficient in JavaScript, TypeScript, Python, Java, C, and SQL. For frameworks: React, Next.js, Node.js, Express, Flask, FastAPI. Cloud: AWS (EC2, Lambda, S3), Azure, Docker. AI/ML: TensorFlow, PyTorch, OpenCV. Check the Skills section for the full breakdown!"
+      } else if (userMessage.includes("education") || userMessage.includes("study") || userMessage.includes("degree") || userMessage.includes("college")) {
         botResponse =
-          "Arnav has a strong educational background in Computer Science with a focus on AI and web technologies."
+          "Arnav is pursuing B.Tech in Information Technology (Honors) at Shri Ramdeobaba College of Engineering and Management, Nagpur (2023-2027) with a 9.18 CGPA."
+      } else if (userMessage.includes("certification") || userMessage.includes("certificate") || userMessage.includes("aws")) {
+        botResponse =
+          "Arnav has certifications in Cloud Architecting (AWS, 60hrs), Data Engineering (AWS, 40hrs), Computer Vision (IBM), Python Programming (Google/Coursera), and Cybersecurity Architecture (IBM/Coursera). Check the Certifications section!"
+      } else if (userMessage.includes("achievement") || userMessage.includes("dsa") || userMessage.includes("leetcode") || userMessage.includes("open source")) {
+        botResponse =
+          "Arnav has solved 400+ DSA problems on LeetCode and other platforms, maintained a 200+ day coding streak, contributed to open-source projects at OpenSauced (Pizza CLI) and AutoMQ, and participated in national-level hackathons!"
       } else if (userMessage.includes("thank")) {
-        botResponse = "You're welcome! Feel free to ask if you have any other questions."
+        botResponse = "You're welcome! Feel free to ask if you have any other questions about Arnav."
+      } else if (userMessage.includes("resume") || userMessage.includes("cv")) {
+        botResponse =
+          "You can download Arnav's resume from the Contact section, or directly from GitHub: github.com/arnvjshi/arnvjshi"
       } else {
         botResponse =
-          "That's an interesting question! Arnav would be happy to discuss this further. Would you like to reach out to him directly through the contact form?"
+          "That's a great question! Arnav would be happy to discuss this further. Would you like to reach out to him directly at arnvjshi@gmail.com or use the contact form?"
       }
 
       setMessages((prev) => [...prev, { text: botResponse, sender: "bot" }])
@@ -91,13 +101,17 @@ export default function Chatbot() {
     <>
       {/* Chatbot toggle button */}
       <motion.button
-        className="fixed bottom-6 right-6 z-50 neumorphic-btn-3d p-4 rounded-full text-black dark:text-white"
-        whileHover={{ scale: 1.1 }}
+        className="fixed bottom-6 right-6 z-50 p-4 rounded-full text-white"
+        style={{
+          background: "linear-gradient(135deg, #10b981, #059669)",
+          boxShadow: "0 4px 20px rgba(16, 185, 129, 0.3)",
+        }}
+        whileHover={{ scale: 1.1, boxShadow: "0 6px 30px rgba(16, 185, 129, 0.4)" }}
         whileTap={{ scale: 0.9 }}
         onClick={toggleChat}
         aria-label="Toggle chat"
       >
-        {isOpen ? <X size={24} /> : <MessageSquare size={24} />}
+        {isOpen ? <X size={22} /> : <MessageSquare size={22} />}
       </motion.button>
 
       {/* Chatbot window */}
@@ -108,61 +122,61 @@ export default function Chatbot() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
             transition={{ type: "spring", damping: 20 }}
-            className="fixed bottom-24 right-6 z-50 w-80 md:w-96 h-[500px] glassmorphic-card-advanced rounded-xl overflow-hidden flex flex-col"
+            className="fixed bottom-24 right-6 z-50 w-80 md:w-96 h-[500px] rounded-xl overflow-hidden flex flex-col border border-white/[0.08]"
+            style={{
+              background: "rgba(10, 10, 10, 0.95)",
+              backdropFilter: "blur(20px)",
+            }}
           >
             {/* Chat header */}
-            <div className="p-4 border-b border-white/10 dark:border-black/10 flex justify-between items-center bg-gray-100/80 dark:bg-gray-800/80 backdrop-blur-md">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 dark:from-gray-300 dark:to-gray-500 flex items-center justify-center">
-                  <Bot size={18} className="text-white dark:text-gray-900" />
+            <div className="p-4 border-b border-white/[0.06] flex justify-between items-center">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                  <Bot size={16} className="text-emerald-400" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-sm">Arnav's Assistant</h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Always here to help</p>
+                  <h3 className="font-semibold text-sm text-white">Arnav's Assistant</h3>
+                  <p className="text-[10px] text-white/40">Always here to help</p>
                 </div>
               </div>
               <button
                 onClick={toggleChat}
-                className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                className="p-1.5 rounded-full hover:bg-white/[0.06] transition-colors"
                 aria-label="Close chat"
               >
-                <X size={18} />
+                <X size={16} className="text-white/40" />
               </button>
             </div>
 
             {/* Chat messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/50 dark:bg-gray-900/50">
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {messages.map((message, index) => (
                 <motion.div
                   key={index}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
+                  transition={{ delay: index * 0.05 }}
                   className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}
                 >
                   {message.sender === "bot" && (
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 dark:from-gray-300 dark:to-gray-500 flex items-center justify-center mr-2 flex-shrink-0 self-end">
-                      <Bot size={16} className="text-white dark:text-gray-900" />
+                    <div className="w-7 h-7 rounded-full bg-emerald-500/20 flex items-center justify-center mr-2 flex-shrink-0 self-end">
+                      <Bot size={14} className="text-emerald-400" />
                     </div>
                   )}
 
                   <div
-                    className={`max-w-[80%] p-3 rounded-lg ${
+                    className={`max-w-[80%] p-3 rounded-lg text-sm ${
                       message.sender === "user"
-                        ? "bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 rounded-tr-none"
-                        : "bg-white dark:bg-gray-800 rounded-tl-none shadow-sm"
+                        ? "bg-emerald-500/20 text-white rounded-tr-none border border-emerald-500/10"
+                        : "bg-white/[0.04] text-white/80 rounded-tl-none border border-white/[0.06]"
                     }`}
                   >
-                    <p className="text-sm">{message.text}</p>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 mt-1 block text-right">
-                      {message.sender === "user" ? "You" : "Bot"} •{" "}
-                      {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                    </span>
+                    <p className="text-[13px] leading-relaxed">{message.text}</p>
                   </div>
 
                   {message.sender === "user" && (
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-500 to-gray-700 dark:from-gray-400 dark:to-gray-600 flex items-center justify-center ml-2 flex-shrink-0 self-end">
-                      <User size={16} className="text-white" />
+                    <div className="w-7 h-7 rounded-full bg-white/[0.08] flex items-center justify-center ml-2 flex-shrink-0 self-end">
+                      <User size={14} className="text-white/60" />
                     </div>
                   )}
                 </motion.div>
@@ -175,25 +189,25 @@ export default function Chatbot() {
                   animate={{ opacity: 1, y: 0 }}
                   className="flex justify-start"
                 >
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 dark:from-gray-300 dark:to-gray-500 flex items-center justify-center mr-2 flex-shrink-0 self-end">
-                    <Bot size={16} className="text-white dark:text-gray-900" />
+                  <div className="w-7 h-7 rounded-full bg-emerald-500/20 flex items-center justify-center mr-2 flex-shrink-0 self-end">
+                    <Bot size={14} className="text-emerald-400" />
                   </div>
-                  <div className="bg-white dark:bg-gray-800 p-3 rounded-lg rounded-tl-none shadow-sm">
+                  <div className="bg-white/[0.04] p-3 rounded-lg rounded-tl-none border border-white/[0.06]">
                     <div className="flex space-x-1">
                       <motion.div
-                        className="w-2 h-2 rounded-full bg-gray-400 dark:bg-gray-500"
-                        animate={{ y: [0, -5, 0] }}
-                        transition={{ repeat: Number.POSITIVE_INFINITY, duration: 0.8, delay: 0 }}
+                        className="w-1.5 h-1.5 rounded-full bg-emerald-400/60"
+                        animate={{ y: [0, -4, 0] }}
+                        transition={{ repeat: Infinity, duration: 0.8, delay: 0 }}
                       />
                       <motion.div
-                        className="w-2 h-2 rounded-full bg-gray-400 dark:bg-gray-500"
-                        animate={{ y: [0, -5, 0] }}
-                        transition={{ repeat: Number.POSITIVE_INFINITY, duration: 0.8, delay: 0.2 }}
+                        className="w-1.5 h-1.5 rounded-full bg-emerald-400/60"
+                        animate={{ y: [0, -4, 0] }}
+                        transition={{ repeat: Infinity, duration: 0.8, delay: 0.2 }}
                       />
                       <motion.div
-                        className="w-2 h-2 rounded-full bg-gray-400 dark:bg-gray-500"
-                        animate={{ y: [0, -5, 0] }}
-                        transition={{ repeat: Number.POSITIVE_INFINITY, duration: 0.8, delay: 0.4 }}
+                        className="w-1.5 h-1.5 rounded-full bg-emerald-400/60"
+                        animate={{ y: [0, -4, 0] }}
+                        transition={{ repeat: Infinity, duration: 0.8, delay: 0.4 }}
                       />
                     </div>
                   </div>
@@ -206,7 +220,7 @@ export default function Chatbot() {
             {/* Chat input */}
             <form
               onSubmit={handleSubmit}
-              className="p-3 border-t border-white/10 dark:border-black/10 flex gap-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md"
+              className="p-3 border-t border-white/[0.06] flex gap-2"
             >
               <div className="flex-1 relative">
                 <input
@@ -215,32 +229,35 @@ export default function Chatbot() {
                   value={input}
                   onChange={handleInputChange}
                   placeholder="Type your message..."
-                  className="neumorphic-input-3d w-full px-4 py-3 pr-10 rounded-full text-sm"
+                  className="neumorphic-input-3d w-full px-4 py-2.5 pr-10 rounded-full text-sm"
                 />
                 <button
                   type="button"
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/20 hover:text-white/40"
                 >
-                  <Smile size={18} />
+                  <Smile size={16} />
                 </button>
               </div>
               <motion.button
                 type="submit"
-                className="neumorphic-btn-3d p-3 rounded-full bg-gradient-to-r from-gray-700 to-gray-900 dark:from-gray-300 dark:to-gray-500 text-white dark:text-gray-900"
+                className="p-2.5 rounded-full text-white"
+                style={{
+                  background: input.trim() ? "linear-gradient(135deg, #10b981, #059669)" : "rgba(255,255,255,0.04)",
+                }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 disabled={input.trim() === ""}
                 aria-label="Send message"
               >
-                <Send size={18} />
+                <Send size={16} />
               </motion.button>
             </form>
 
             {/* Suggested questions */}
-            <div className="p-3 border-t border-white/10 dark:border-black/10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md">
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Suggested questions:</p>
-              <div className="flex flex-wrap gap-2">
-                {["What projects have you worked on?", "What are your skills?", "How can I contact you?"].map(
+            <div className="p-3 border-t border-white/[0.06]">
+              <p className="text-[10px] text-white/30 mb-2 uppercase tracking-[0.1em]">Suggested</p>
+              <div className="flex flex-wrap gap-1.5">
+                {["What projects has Arnav built?", "Tell me about his skills", "How can I contact him?", "What certifications does he have?"].map(
                   (question, index) => (
                     <button
                       key={index}
@@ -248,7 +265,7 @@ export default function Chatbot() {
                         setInput(question)
                         inputRef.current?.focus()
                       }}
-                      className="text-xs py-1 px-3 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                      className="text-[11px] py-1 px-2.5 rounded-full bg-white/[0.04] border border-white/[0.06] hover:border-emerald-500/20 hover:text-emerald-400 transition-colors text-white/40"
                     >
                       {question}
                     </button>
@@ -262,4 +279,3 @@ export default function Chatbot() {
     </>
   )
 }
-
